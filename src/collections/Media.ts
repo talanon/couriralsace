@@ -8,8 +8,13 @@ import {
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { assignTenantFromUser } from '../hooks/assignTenant'
+import {
+  getTenantIdFromRequest,
+  isSuperAdmin,
+  restrictToUserTenants,
+  requireTenantRole,
+} from '../access/tenants'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,10 +28,21 @@ export const Media: CollectionConfig = {
   },
   folders: true,
   access: {
-    create: authenticated,
-    delete: authenticated,
-    read: anyone,
-    update: authenticated,
+    create: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
+    delete: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
+    read: async (args) => {
+      if (args.req.user) {
+        return restrictToUserTenants(args, { field: 'tenant' })
+      }
+      const tenantId = await getTenantIdFromRequest(args.req)
+      if (!tenantId) return false
+      return {
+        tenant: {
+          equals: tenantId,
+        },
+      }
+    },
+    update: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
   },
   fields: [
     {
@@ -45,7 +61,28 @@ export const Media: CollectionConfig = {
       }),
       label: 'Légende',
     },
+    {
+      name: 'tenant',
+      type: 'relationship',
+      relationTo: 'tenants',
+      admin: {
+        hidden: true,
+      },
+    },
   ],
+  hooks: {
+    beforeValidate: [
+      ({ data, req }) => {
+        if (req?.user?.roles?.includes('super-admin')) return data
+        if (!data) return data
+        if (!data.tenant) {
+          throw new Error('Le tenant est requis sauf pour les super-admins')
+        }
+        return data
+      },
+    ],
+    beforeChange: [assignTenantFromUser],
+  },
   upload: {
     // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
     staticDir: path.resolve(dirname, '../../public/media'),

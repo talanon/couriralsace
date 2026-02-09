@@ -29,7 +29,7 @@ const getTenantMembershipsFromRequest = async (req: AccessArgs['req']): Promise<
   return memberships
 }
 
-const normalizeTenantId = (value: TenantRelationship | undefined | null): string | null => {
+export const normalizeTenantId = (value: TenantRelationship | undefined | null): string | null => {
   if (!value) return null
   if (typeof value === 'string' && value.length) return value
   if (typeof value === 'number') return String(value)

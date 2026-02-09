@@ -1,10 +1,17 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import sharp from 'sharp'
 import path from 'path'
-import { buildConfig, PayloadRequest } from 'payload'
+import { buildConfig, type AccessArgs, type CollectionConfig, PayloadRequest } from 'payload'
 import { en } from '@payloadcms/translations/languages/en'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { fileURLToPath } from 'url'
+import nodemailer from 'nodemailer'
+
+type MailerConfig = {
+  defaultFromAddress: string
+  defaultFromName: string
+  transport: ReturnType<typeof nodemailer['createTransport']>
+}
 
 import { Categories } from './collections/Categories'
 import { Events } from './collections/Events'
@@ -18,9 +25,101 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import {
+  getTenantIdFromRequest,
+  isSuperAdmin,
+  requireTenantRole,
+  restrictToUserTenants,
+} from './access/tenants'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const folderEditorRoles = ['admin', 'organizer']
+
+const assignTenantToFolder = async ({
+  data,
+  req,
+}: {
+  data?: Record<string, unknown>
+  req?: PayloadRequest
+}) => {
+  if (!data || !req) {
+    return data
+  }
+
+  const tenantId = await getTenantIdFromRequest(req)
+  if (!tenantId) {
+    return data
+  }
+
+  ;(data as Record<string, unknown>).tenant = tenantId
+  return data
+}
+
+const folderCollectionOverrides = [
+  ({ collection }: { collection: CollectionConfig }) => {
+    const tenantField = {
+      name: 'tenant',
+      type: 'relationship',
+      relationTo: 'tenants',
+      admin: {
+        description: 'Tenant propriétaire du dossier (assigné automatiquement).',
+        position: 'sidebar',
+        condition: (_data: unknown, _siblingData: unknown, { user }: { user?: PayloadRequest['user'] }) =>
+          Boolean(user && isSuperAdmin(user)),
+      },
+      access: {
+        create: ({ req }) => Boolean(req?.user && isSuperAdmin(req.user)),
+        update: ({ req }) => Boolean(req?.user && isSuperAdmin(req.user)),
+      },
+    }
+
+    const folderReadAccess = (args: AccessArgs) => {
+      if (isSuperAdmin(args.req?.user)) {
+        return true
+      }
+      return restrictToUserTenants(args, { field: 'tenant' })
+    }
+
+    const collectionAccess = {
+      ...collection.access,
+      create: (args: AccessArgs) => requireTenantRole(args, undefined, folderEditorRoles),
+      read: folderReadAccess,
+      readVersions: folderReadAccess,
+      update: (args: AccessArgs) => requireTenantRole(args, undefined, folderEditorRoles),
+      delete: (args: AccessArgs) => requireTenantRole(args, undefined, folderEditorRoles),
+    }
+
+    const beforeValidate = [
+      ...(collection.hooks?.beforeValidate ?? []),
+      assignTenantToFolder,
+    ]
+
+    return {
+      ...collection,
+      access: collectionAccess,
+      fields: [...collection.fields, tenantField],
+      hooks: {
+        ...(collection.hooks ?? {}),
+        beforeValidate,
+      },
+    }
+  },
+]
+
+const mailerDsn = process.env.MAILER_DSN
+const defaultFromAddress = process.env.MAILER_FROM ?? 'no-reply@couriralsace.local'
+const defaultFromName = process.env.MAILER_FROM_NAME ?? 'Courir Alsace'
+const mailerTransport =
+  mailerDsn && mailerDsn.length
+    ? nodemailer.createTransport(mailerDsn, {
+        tls: {
+          rejectUnauthorized: process.env.MAILER_TLS_REJECT !== '0',
+        },
+      })
+    : null
+
 
 export default buildConfig({
   admin: {
@@ -31,6 +130,7 @@ export default buildConfig({
       // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below.
       beforeDashboard: ['@/components/BeforeDashboard'],
+      Nav: '@/components/Nav',
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -75,9 +175,27 @@ export default buildConfig({
     },
   }),
   collections: [Pages, Posts, Media, Categories, Users, Tenants, Events],
+  folders: {
+    collectionOverrides: folderCollectionOverrides,
+  },
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,
+  email:
+    mailerTransport !== null
+      ? () => ({
+          name: 'smtp',
+          defaultFromAddress: defaultFromAddress,
+          defaultFromName: defaultFromName,
+          async sendEmail(message) {
+            const normalizedFrom = message.from ?? `${defaultFromName} <${defaultFromAddress}>`
+            await mailerTransport.sendMail({
+              ...message,
+              from: normalizedFrom,
+            })
+          },
+        })
+      : undefined,
   secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {

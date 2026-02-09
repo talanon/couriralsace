@@ -294,6 +294,7 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  tenant?: (number | null) | Tenant;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -367,6 +368,36 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: number;
+  name: string;
+  slug: string;
+  region?: string | null;
+  type?: string | null;
+  summary?: string | null;
+  domains: {
+    host: string;
+    id?: string | null;
+  }[];
+  branding?: {
+    logo?: (number | null) | Media;
+    cover?: (number | null) | Media;
+    colors?: {
+      primary?: string | null;
+      accent?: string | null;
+    };
+    social?: {
+      instagram?: string | null;
+      facebook?: string | null;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-folders".
  */
 export interface FolderInterface {
@@ -388,6 +419,10 @@ export interface FolderInterface {
     totalDocs?: number;
   };
   folderType?: 'media'[] | null;
+  /**
+   * Tenant propriétaire du dossier (assigné automatiquement).
+   */
+  tenant?: (number | null) | Tenant;
   updatedAt: string;
   createdAt: string;
 }
@@ -440,6 +475,8 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -451,40 +488,6 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants".
- */
-export interface Tenant {
-  id: number;
-  name: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  region?: string | null;
-  type?: string | null;
-  summary?: string | null;
-  domains: {
-    host: string;
-    id?: string | null;
-  }[];
-  branding?: {
-    logo?: (number | null) | Media;
-    cover?: (number | null) | Media;
-    colors?: {
-      primary?: string | null;
-      accent?: string | null;
-    };
-    social?: {
-      instagram?: string | null;
-      facebook?: string | null;
-    };
-  };
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1325,6 +1328,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  tenant?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1453,6 +1457,8 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1469,7 +1475,6 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface TenantsSelect<T extends boolean = true> {
   name?: T;
-  generateSlug?: T;
   slug?: T;
   region?: T;
   type?: T;
@@ -1774,6 +1779,7 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
   folder?: T;
   documentsAndFolders?: T;
   folderType?: T;
+  tenant?: T;
   updatedAt?: T;
   createdAt?: T;
 }

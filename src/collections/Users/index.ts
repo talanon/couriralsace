@@ -1,4 +1,6 @@
+import { URL } from 'url'
 import type { CollectionConfig } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 
 import { getTenantIdsFromMemberships, requireTenantRole, isSuperAdmin } from '../../access/tenants'
 
@@ -30,7 +32,29 @@ export const Users: CollectionConfig = {
     },
     update: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
   },
-  auth: true,
+  auth: {
+    verify: {
+      generateEmailSubject: ({ req }) => req.t('authentication:verifyYourEmail'),
+      generateEmailHTML: async ({ req, token }) => {
+        const protocol = new URL(req.url!).protocol
+        const host = req.headers.get('host')
+        const serverURL =
+          req.payload.config.serverURL && req.payload.config.serverURL.length
+            ? req.payload.config.serverURL
+            : host
+            ? `${protocol}//${host}`
+            : 'http://localhost:3000'
+
+        const verificationURL = formatAdminURL({
+          adminRoute: req.payload.config.routes.admin,
+          path: `/users/verify/${token}`,
+          serverURL,
+        })
+
+        return `<p>${req.t('authentication:verifyYourEmail')}</p><p><a href="${verificationURL}">${verificationURL}</a></p>`
+      },
+    },
+  },
   admin: {
     defaultColumns: ['name', 'email'],
     useAsTitle: 'name',

@@ -1,6 +1,4 @@
-import type { CollectionConfig } from 'payload'
-
-import { slugField } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 
 import { anyone } from '../../access/anyone'
 import { isSuperAdmin, restrictToUserTenants } from '../../access/tenants'
@@ -30,7 +28,16 @@ export const Tenants: CollectionConfig = {
       required: true,
       label: 'Nom de l’organisateur',
     },
-    slugField({ generateFrom: 'name' }),
+    {
+      name: 'slug',
+      type: 'text',
+      required: true,
+      unique: true,
+      index: true,
+      admin: {
+        hidden: true,
+      },
+    } satisfies Field,
     {
       name: 'region',
       type: 'text',
@@ -95,6 +102,18 @@ export const Tenants: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'tenantMembersPanel',
+      type: 'ui',
+      label: 'Affiliations à l’organisation',
+      admin: {
+        description: 'Gère les utilisateurs liés à ce tenant sans quitter cette fiche.',
+        components: {
+          Field: '@/components/Tenants/Members',
+        },
+        condition: (_data, _siblingData, { operation }) => operation === 'update',
+      },
     },
   ],
   hooks: {
