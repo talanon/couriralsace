@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
-import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { isSuperAdmin, restrictToUserTenants, requireTenantRole } from '../../access/tenants'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
@@ -12,6 +11,7 @@ import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+import { assignTenantFromUser } from '../../hooks/assignTenant'
 
 import {
   MetaDescriptionField,
@@ -23,11 +23,25 @@ import {
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
+  labels: {
+    label: 'Pages',
+    singular: 'Page',
+    plural: 'Pages',
+  },
   access: {
-    create: authenticated,
-    delete: authenticated,
-    read: authenticatedOrPublished,
-    update: authenticated,
+    create: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
+    delete: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
+    read: (args) => {
+      if (args.req.user) {
+        return restrictToUserTenants(args, { field: 'tenant' })
+      }
+      return {
+        _status: {
+          equals: 'published',
+        },
+      }
+    },
+    update: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
   },
   // This config controls what's populated by default when a page is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -59,6 +73,7 @@ export const Pages: CollectionConfig<'pages'> = {
       name: 'title',
       type: 'text',
       required: true,
+      label: 'Titre',
     },
     {
       type: 'tabs',
@@ -79,17 +94,17 @@ export const Pages: CollectionConfig<'pages'> = {
               },
             },
           ],
-          label: 'Content',
+          label: 'Contenu',
         },
         {
           name: 'meta',
           label: 'SEO',
-          fields: [
-            OverviewField({
-              titlePath: 'meta.title',
-              descriptionPath: 'meta.description',
-              imagePath: 'meta.image',
-            }),
+            fields: [
+              OverviewField({
+                titlePath: 'meta.title',
+                descriptionPath: 'meta.description',
+                imagePath: 'meta.image',
+              }),
             MetaTitleField({
               hasGenerateFn: true,
             }),
@@ -116,12 +131,31 @@ export const Pages: CollectionConfig<'pages'> = {
       admin: {
         position: 'sidebar',
       },
+      label: 'Date de publication',
     },
     slugField(),
+    {
+      name: 'tenant',
+      type: 'relationship',
+      relationTo: 'tenants',
+      admin: {
+        hidden: true,
+      },
+    },
   ],
   hooks: {
+    beforeValidate: [
+      ({ data, req }) => {
+        if (req?.user?.roles?.includes('super-admin')) return data
+        if (!data) return data
+        if (!data.tenant) {
+          throw new Error('Le tenant est requis sauf pour les super-admins')
+        }
+        return data
+      },
+    ],
+    beforeChange: [populatePublishedAt, assignTenantFromUser],
     afterChange: [revalidatePage],
-    beforeChange: [populatePublishedAt],
     afterDelete: [revalidateDelete],
   },
   versions: {

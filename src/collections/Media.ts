@@ -16,6 +16,11 @@ const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  labels: {
+    label: 'Médias',
+    singular: 'Média',
+    plural: 'Médias',
+  },
   folders: true,
   access: {
     create: authenticated,
@@ -28,6 +33,7 @@ export const Media: CollectionConfig = {
       name: 'alt',
       type: 'text',
       //required: true,
+      label: 'Texte alternatif',
     },
     {
       name: 'caption',
@@ -37,6 +43,7 @@ export const Media: CollectionConfig = {
           return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
         },
       }),
+      label: 'Légende',
     },
   ],
   upload: {

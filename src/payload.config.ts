@@ -2,12 +2,16 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import sharp from 'sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
+import { en } from '@payloadcms/translations/languages/en'
+import { fr } from '@payloadcms/translations/languages/fr'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
+import { Events } from './collections/Events'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
+import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
@@ -57,12 +61,20 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
+  i18n: {
+    fallbackLanguage: 'en',
+    defaultLocale: 'fr',
+    supportedLanguages: {
+      en,
+      fr,
+    },
+  },
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [Pages, Posts, Media, Categories, Users, Tenants, Events],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,
