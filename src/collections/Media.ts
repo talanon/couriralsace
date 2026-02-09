@@ -9,12 +9,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { assignTenantFromUser } from '../hooks/assignTenant'
-import {
-  getTenantIdFromRequest,
-  isSuperAdmin,
-  restrictToUserTenants,
-  requireTenantRole,
-} from '../access/tenants'
+import { requireTenantField } from '../hooks/requireTenant'
+import { getTenantIdFromRequest, restrictToUserTenants, requireTenantRole } from '../access/tenants'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -71,16 +67,7 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeValidate: [
-      ({ data, req }) => {
-        if (req?.user?.roles?.includes('super-admin')) return data
-        if (!data) return data
-        if (!data.tenant) {
-          throw new Error('Le tenant est requis sauf pour les super-admins')
-        }
-        return data
-      },
-    ],
+    beforeValidate: [requireTenantField],
     beforeChange: [assignTenantFromUser],
   },
   upload: {

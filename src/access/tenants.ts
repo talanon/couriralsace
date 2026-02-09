@@ -13,7 +13,7 @@ const membershipCacheKey = '__courirTenantMemberships'
 const tenantRequestCacheKey = '__courirTenantIdFromRequest'
 const tenantHeaderKey = 'x-courir-tenant-id'
 
-const getTenantMembershipsFromRequest = async (req: AccessArgs['req']): Promise<TenantMembership[]> => {
+export const getTenantMembershipsFromRequest = async (req: AccessArgs['req']): Promise<TenantMembership[]> => {
   if (!req.payload || !req.user) return []
 
   const cached = (req as any)[membershipCacheKey]

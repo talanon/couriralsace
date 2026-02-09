@@ -95,21 +95,46 @@ const pageTemplates = (tenantName: string): PageTemplate[] => [
   },
 ]
 
-const createBasePage = (tenantId: number, template: PageTemplate) => ({
-  title: template.title,
-  slug: template.slug,
-  _status: 'published',
-  tenant: tenantId,
-  hero: {
-    type: 'none',
-  },
-  layout: [contentBlock(template.title, template.body)],
+const createContactFormBlock = (formId: number, tenantName: string) => ({
+  blockType: 'formBlock',
+  blockName: 'Formulaire de contact',
+  enableIntro: true,
+  introContent: createRichText([
+    createHeadingNode('Contact'),
+    createParagraphNode(`Contactez l'équipe ${tenantName} via le formulaire ci-dessous.`),
+  ]),
+  form: formId,
 })
 
-const registrationFormPayload = (tenantName: string) => ({
+const createBasePage = (
+  tenantId: number,
+  template: PageTemplate,
+  tenantName: string,
+  contactFormId?: number,
+) => {
+  const layout = [contentBlock(template.title, template.body)]
+
+  if (template.slug === 'contact' && contactFormId) {
+    layout.push(createContactFormBlock(contactFormId, tenantName))
+  }
+
+  return {
+    title: template.title,
+    slug: template.slug,
+    _status: 'published',
+    tenant: tenantId,
+    hero: {
+      type: 'none',
+    },
+    layout,
+  }
+}
+
+const registrationFormPayload = (tenantName: string, tenantId: number) => ({
   title: `Inscription - ${tenantName}`,
   submitButtonLabel: 'S’inscrire',
   confirmationType: 'message',
+  tenant: tenantId,
   confirmationMessage: createRichText([
     createParagraphNode(
       'Merci pour votre demande d’inscription. Nous reviendrons vers vous rapidement avec tous les détails.',
@@ -157,6 +182,49 @@ const registrationFormPayload = (tenantName: string) => ({
   ],
 })
 
+const contactFormPayload = (tenantName: string, tenantId: number) => ({
+  title: `Contact - ${tenantName}`,
+  submitButtonLabel: 'Envoyer',
+  confirmationType: 'message',
+  tenant: tenantId,
+  confirmationMessage: createRichText([
+    createParagraphNode('Merci pour votre message. Nous reviendrons vers vous très rapidement.'),
+  ]),
+  fields: [
+    {
+      name: 'full-name',
+      blockName: 'full-name',
+      blockType: 'text',
+      label: 'Nom complet',
+      required: true,
+      width: 100,
+    },
+    {
+      name: 'email',
+      blockName: 'email',
+      blockType: 'email',
+      label: 'Email',
+      required: true,
+      width: 100,
+    },
+    {
+      name: 'phone',
+      blockName: 'phone',
+      blockType: 'number',
+      label: 'Téléphone',
+      width: 100,
+    },
+    {
+      name: 'message',
+      blockName: 'message',
+      blockType: 'textarea',
+      label: 'Message',
+      required: true,
+      width: 100,
+    },
+  ],
+})
+
 const inscriptionLayout = (formId: number, tenantName: string) => [
   contentBlock(
     'Inscription',
@@ -178,14 +246,20 @@ export const createTenantPages: AfterChangeHook<Tenant> = async ({ doc, operatio
   const tenantId = doc.id
   const tenantName = doc.name ?? 'votre organisation'
 
-  const form = await req.payload.create({
+  const registrationForm = await req.payload.create({
     collection: 'forms',
-    data: registrationFormPayload(tenantName),
+    data: registrationFormPayload(tenantName, tenantId),
+    req,
+  })
+
+  const contactForm = await req.payload.create({
+    collection: 'forms',
+    data: contactFormPayload(tenantName, tenantId),
     req,
   })
 
   const basePagePayloads = pageTemplates(tenantName).map((template) =>
-    createBasePage(tenantId, template),
+    createBasePage(tenantId, template, tenantName, contactForm.id),
   )
 
   const createdPages: Page[] = []
@@ -207,7 +281,7 @@ export const createTenantPages: AfterChangeHook<Tenant> = async ({ doc, operatio
     hero: {
       type: 'none',
     },
-    layout: inscriptionLayout(form.id, tenantName),
+    layout: inscriptionLayout(registrationForm.id, tenantName),
   }
 
   await req.payload.create({

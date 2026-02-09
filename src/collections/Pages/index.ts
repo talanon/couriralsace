@@ -13,6 +13,7 @@ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import { assignTenantFromUser } from '../../hooks/assignTenant'
 import { ensureUniquePageSlug } from '../../hooks/ensureUniquePageSlug'
+import { requireTenantField } from '../../hooks/requireTenant'
 
 import {
   MetaDescriptionField,
@@ -156,16 +157,7 @@ export const Pages: CollectionConfig<'pages'> = {
     },
   ],
   hooks: {
-    beforeValidate: [
-      ({ data, req }) => {
-        if (req?.user?.roles?.includes('super-admin')) return data
-        if (!data) return data
-        if (!data.tenant) {
-          throw new Error('Le tenant est requis sauf pour les super-admins')
-        }
-        return data
-      },
-    ],
+    beforeValidate: [requireTenantField],
     beforeChange: [populatePublishedAt, assignTenantFromUser, ensureUniquePageSlug],
     afterChange: [revalidatePage],
     afterDelete: [revalidateDelete],

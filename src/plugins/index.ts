@@ -5,6 +5,8 @@ import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
+import { assignTenantFromUser } from '@/hooks/assignTenant'
+import { requireTenantField } from '@/hooks/requireTenant'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { searchFields } from '@/search/fieldOverrides'
@@ -12,6 +14,7 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
+import { restrictToUserTenants, requireTenantRole } from '@/access/tenants'
 import { superAdminOnly } from '@/access'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
@@ -22,6 +25,17 @@ const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
   const url = getServerSideURL()
 
   return doc?.slug ? `${url}/${doc.slug}` : url
+}
+
+const tenantFormRoles = ['admin', 'organizer']
+
+const tenantFormField = {
+  name: 'tenant',
+  type: 'relationship',
+  relationTo: 'tenants',
+  admin: {
+    hidden: true,
+  },
 }
 
 export const plugins: Plugin[] = [
@@ -77,7 +91,7 @@ export const plugins: Plugin[] = [
         plural: 'Formulaires',
       },
       fields: ({ defaultFields }) => {
-        return defaultFields.map((field) => {
+        const updatedFields = defaultFields.map((field) => {
           if ('name' in field && field.name === 'confirmationMessage') {
             return {
               ...field,
@@ -94,6 +108,27 @@ export const plugins: Plugin[] = [
           }
           return field
         })
+
+        return [
+          ...updatedFields,
+          {
+            ...tenantFormField,
+          },
+        ]
+      },
+      access: {
+        read: (args) => {
+          if (args.req.user) {
+            return restrictToUserTenants(args, { field: 'tenant' })
+          }
+          return false
+        },
+        create: (args) => requireTenantRole(args, undefined, tenantFormRoles),
+        update: (args) => requireTenantRole(args, undefined, tenantFormRoles),
+        delete: (args) => requireTenantRole(args, undefined, tenantFormRoles),
+      },
+      hooks: {
+        beforeValidate: [assignTenantFromUser, requireTenantField],
       },
     },
     formSubmissionOverrides: {
