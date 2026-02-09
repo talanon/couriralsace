@@ -12,6 +12,7 @@ import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import { assignTenantFromUser } from '../../hooks/assignTenant'
+import { ensureUniquePageSlug } from '../../hooks/ensureUniquePageSlug'
 
 import {
   MetaDescriptionField,
@@ -133,7 +134,18 @@ export const Pages: CollectionConfig<'pages'> = {
       },
       label: 'Date de publication',
     },
-    slugField(),
+    slugField({
+      overrides: (field) => ({
+        ...field,
+        fields: [
+          field.fields[0],
+          {
+            ...field.fields[1],
+            unique: false,
+          },
+        ],
+      }),
+    }),
     {
       name: 'tenant',
       type: 'relationship',
@@ -154,7 +166,7 @@ export const Pages: CollectionConfig<'pages'> = {
         return data
       },
     ],
-    beforeChange: [populatePublishedAt, assignTenantFromUser],
+    beforeChange: [populatePublishedAt, assignTenantFromUser, ensureUniquePageSlug],
     afterChange: [revalidatePage],
     afterDelete: [revalidateDelete],
   },

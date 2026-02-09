@@ -8,12 +8,12 @@ import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
 import { SearchIcon } from 'lucide-react'
 
-export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
-  const navItems = data?.navItems || []
+export const HeaderNav: React.FC<{ navItems?: HeaderType['navItems'] }> = ({ navItems }) => {
+  const navItemsList = navItems || []
 
   return (
     <nav className="flex gap-3 items-center">
-      {navItems.map(({ link }, i) => {
+      {navItemsList.map(({ link }, i) => {
         return <CMSLink key={i} {...link} appearance="link" />
       })}
       <Link href="/search">

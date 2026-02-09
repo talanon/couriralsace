@@ -21,6 +21,7 @@ type AdminNavProps = {
 const restrictedCollections = new Set([
   'categories',
   'events',
+  'users',
   'form-submissions',
   'redirects',
 ])

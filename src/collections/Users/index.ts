@@ -1,8 +1,17 @@
 import { URL } from 'url'
-import type { CollectionConfig } from 'payload'
+import type { AccessArgs, CollectionConfig } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 
 import { getTenantIdsFromMemberships, requireTenantRole, isSuperAdmin } from '../../access/tenants'
+
+const canReadOrUpdateSelf = ({ req, id }: AccessArgs): boolean => {
+  if (!req?.user) return false
+
+  if (id === 'me') return true
+  if (id && req.user.id === id) return true
+
+  return isSuperAdmin(req.user)
+}
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -15,22 +24,8 @@ export const Users: CollectionConfig = {
     admin: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
     create: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
     delete: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
-    read: (args) => {
-      const { req, id } = args
-      if (req?.user) {
-        if (id && req.user.id === id) {
-          return true
-        }
-        if (id === 'me') {
-          return true
-        }
-      }
-      if (isSuperAdmin(req?.user)) {
-        return true
-      }
-      return requireTenantRole(args, undefined, ['admin', 'organizer'])
-    },
-    update: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
+    read: (args) => canReadOrUpdateSelf(args),
+    update: (args) => canReadOrUpdateSelf(args),
   },
   auth: {
     verify: {

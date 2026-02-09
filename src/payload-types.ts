@@ -373,7 +373,6 @@ export interface Media {
 export interface Tenant {
   id: number;
   name: string;
-  slug: string;
   region?: string | null;
   type?: string | null;
   summary?: string | null;
@@ -393,6 +392,26 @@ export interface Tenant {
       facebook?: string | null;
     };
   };
+  navItems?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1475,7 +1494,6 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface TenantsSelect<T extends boolean = true> {
   name?: T;
-  slug?: T;
   region?: T;
   type?: T;
   summary?: T;
@@ -1502,6 +1520,20 @@ export interface TenantsSelect<T extends boolean = true> {
               instagram?: T;
               facebook?: T;
             };
+      };
+  navItems?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

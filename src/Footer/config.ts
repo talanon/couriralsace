@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
+import { superAdminOnly } from '@/access'
 import { link } from '@/fields/link'
 import { revalidateFooter } from './hooks/revalidateFooter'
 
@@ -11,7 +12,8 @@ export const Footer: GlobalConfig = {
     plural: 'Pieds de page',
   },
   access: {
-    read: () => true,
+    read: superAdminOnly,
+    update: superAdminOnly,
   },
   fields: [
     {

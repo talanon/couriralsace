@@ -15,6 +15,9 @@
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation next lint --fix",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "reset:tenant": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/reset-tenant.ts",
+    "db:drop-tenant-slug-index": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/drop-tenant-slug-index.ts",
+    "db:drop-tenant-slug-column": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/remove-tenant-slug-column.ts",
     "resend:verifications": "tsx scripts/resend-verification-emails.ts",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
@@ -23,7 +26,6 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
-    "nodemailer": "^6.10.0",
     "@next/env": "^16.1.6",
     "@payloadcms/admin-bar": "3.75.0",
     "@payloadcms/db-postgres": "3.75.0",
@@ -50,6 +52,7 @@
     "lucide-react": "0.563.0",
     "next": "15.4.11",
     "next-sitemap": "^4.2.3",
+    "nodemailer": "^6.10.0",
     "payload": "3.75.0",
     "prism-react-renderer": "^2.3.1",
     "react": "19.2.1",
@@ -73,6 +76,7 @@
     "eslint": "^9.16.0",
     "eslint-config-next": "15.4.11",
     "jsdom": "28.0.0",
+    "pg": "^8.18.0",
     "playwright": "1.56.1",
     "playwright-core": "1.56.1",
     "postcss": "^8.4.38",

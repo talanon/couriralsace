@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { slugField } from 'payload'
 
 import { assignTenantFromUser } from '../../hooks/assignTenant'
-import { restrictToUserTenants, requireTenantRole } from '../../access/tenants'
+import { superAdminOnly } from '../../access'
 
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -13,15 +13,10 @@ export const Events: CollectionConfig = {
     plural: 'Événements',
   },
   access: {
-    create: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
-    delete: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
-    read: (args) => {
-      if (args.req.user) {
-        return restrictToUserTenants(args, { field: 'tenant' })
-      }
-      return true
-    },
-    update: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
+    create: superAdminOnly,
+    delete: superAdminOnly,
+    read: superAdminOnly,
+    update: superAdminOnly,
   },
   admin: {
     defaultColumns: ['title', 'tenant', 'date'],

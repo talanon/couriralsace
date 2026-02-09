@@ -1,5 +1,6 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import type { Tenant as PayloadTenant } from '@/payload-types'
 
 const HUB_HOSTS = new Set([
   'couriralsace.fr',
@@ -10,15 +11,9 @@ const HUB_HOSTS = new Set([
   '::1',
 ])
 
-const tenantCache = new Map<string, Tenant | null>()
+export type Tenant = PayloadTenant
 
-export interface Tenant {
-  id: string
-  slug: string
-  name: string
-  region?: string
-  domains?: Array<{ host: string }>
-}
+const tenantCache = new Map<string, Tenant | null>()
 
 const normalizeHost = (host: string | null) => {
   if (!host) return ''
@@ -47,10 +42,8 @@ export const resolveTenant = async (host: string | null) => {
       depth: 0,
       limit: 1,
       where: {
-        domains: {
-          host: {
-            equals: hostKey,
-          },
+        'domains.host': {
+          equals: hostKey,
         },
       },
       overrideAccess: true,
@@ -64,7 +57,6 @@ export const resolveTenant = async (host: string | null) => {
 
     return null
   }
-
   let tenant = await fetchTenant(normalizedHost)
   if (!tenant && normalizedHost.includes('.')) {
     const [maybeSubdomain] = normalizedHost.split('.')

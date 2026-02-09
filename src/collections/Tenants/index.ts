@@ -2,7 +2,9 @@ import type { CollectionConfig, Field } from 'payload'
 
 import { anyone } from '../../access/anyone'
 import { isSuperAdmin, restrictToUserTenants } from '../../access/tenants'
-import { slugify } from '../../utilities/slugify'
+import { createTenantPages } from '../../hooks/createTenantPages'
+import { revalidateTenantNav } from '../../hooks/revalidateTenantNav'
+import { link } from '@/fields/link'
 
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
@@ -18,7 +20,7 @@ export const Tenants: CollectionConfig = {
     plural: 'Organisateurs',
   },
   admin: {
-    defaultColumns: ['name', 'slug', 'region'],
+    defaultColumns: ['name', 'region'],
     useAsTitle: 'name',
   },
   fields: [
@@ -28,16 +30,6 @@ export const Tenants: CollectionConfig = {
       required: true,
       label: 'Nom de l’organisateur',
     },
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      unique: true,
-      index: true,
-      admin: {
-        hidden: true,
-      },
-    } satisfies Field,
     {
       name: 'region',
       type: 'text',
@@ -104,6 +96,22 @@ export const Tenants: CollectionConfig = {
       ],
     },
     {
+      name: 'navItems',
+      type: 'array',
+      label: 'Menu principal',
+      fields: [
+        link({
+          appearances: false,
+        }),
+      ],
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: '@/components/Tenants/TenantNavRowLabel#TenantNavRowLabel',
+        },
+      },
+    },
+    {
       name: 'tenantMembersPanel',
       type: 'ui',
       label: 'Affiliations à l’organisation',
@@ -117,17 +125,6 @@ export const Tenants: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeValidate: [
-      ({ data }) => {
-        if (!data) return
-        if (!data.slug && typeof data.name === 'string') {
-          data.slug = slugify(data.name)
-        }
-        if (!data.slug) {
-          data.slug = String(Date.now())
-        }
-        return data
-      },
-    ],
+    afterChange: [createTenantPages, revalidateTenantNav],
   },
 }

@@ -116,9 +116,18 @@ Courir Alsace est un SaaS multi‑tenant (hub + sites organisateurs) construit s
 - `middleware.ts` : injection des headers tenant.
 - `src/app/(frontend)/[slug]/page.tsx` : rendu tenant + metadata.
 
+## Rebuild tenant schema
+
+- Si tu as besoin de retirer entièrement la colonne `slug`, lance (une seule fois) :
+  `pnpm db:drop-tenant-slug-column`
+- Ensuite, exécute aussi (une seule fois) :
+  `pnpm db:drop-tenant-slug-index`
+
 ## Prochaines étapes
 
 - Générer les types : `npm run generate:types`.
 - Si tu as besoin d’ajouter des composants personnalisés dans l’admin, utilise `admin.components` et regénère `payload` import map (`npm run generate:importmap`).
 - Normalise les traductions FR/EN via `@payloadcms/translations` si tu veux mondifier l’UI admin.
+- Réinitialiser un tenant (supprime ses pages/contact/formulaires puis recrée la structure par défaut) :
+  `pnpm reset:tenant <tenant-slug-or-id>`
 # couriralsace

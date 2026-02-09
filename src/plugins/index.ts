@@ -12,6 +12,7 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
+import { superAdminOnly } from '@/access'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
@@ -31,6 +32,12 @@ export const plugins: Plugin[] = [
         label: 'Redirections',
         singular: 'Redirection',
         plural: 'Redirections',
+      },
+      access: {
+        read: superAdminOnly,
+        create: superAdminOnly,
+        update: superAdminOnly,
+        delete: superAdminOnly,
       },
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
@@ -94,6 +101,12 @@ export const plugins: Plugin[] = [
         label: 'Soumissions de formulaires',
         singular: 'Soumission de formulaire',
         plural: 'Soumissions de formulaires',
+      },
+      access: {
+        read: superAdminOnly,
+        create: superAdminOnly,
+        update: superAdminOnly,
+        delete: superAdminOnly,
       },
     },
   }),
