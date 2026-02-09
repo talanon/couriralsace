@@ -121,3 +121,4 @@ Courir Alsace est un SaaS multi‑tenant (hub + sites organisateurs) construit s
 - Générer les types : `npm run generate:types`.
 - Si tu as besoin d’ajouter des composants personnalisés dans l’admin, utilise `admin.components` et regénère `payload` import map (`npm run generate:importmap`).
 - Normalise les traductions FR/EN via `@payloadcms/translations` si tu veux mondifier l’UI admin.
+# couriralsace
