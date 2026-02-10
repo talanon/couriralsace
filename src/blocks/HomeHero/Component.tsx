@@ -3,12 +3,15 @@ import React, { type CSSProperties } from 'react'
 import type { HomeHeroBlock as HomeHeroBlockProps } from '@/payload-types'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 
-const buildMediaUrl = (resource: HomeHeroBlockProps['background'], fallback?: string) => {
+const buildMediaUrl = (
+  resource: HomeHeroBlockProps['background'],
+  fallback?: string | null,
+) => {
   if (resource && typeof resource === 'object') {
     return getMediaUrl(resource.url, resource.updatedAt)
   }
 
-  return fallback
+  return fallback ?? undefined
 }
 
 const buildLogoSrc = (resource: HomeHeroBlockProps['logo']) => {
