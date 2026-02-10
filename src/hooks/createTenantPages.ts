@@ -135,6 +135,7 @@ const createBasePage = (
     title: template.title,
     slug: template.slug,
     _status: 'published',
+    template: 'default',
     tenant: tenantId,
     hero: {
       type: 'none',
@@ -296,6 +297,7 @@ export const createTenantPages: CollectionAfterChangeHook<Tenant> = async ({ doc
     title: 'Inscription',
     slug: 'inscription',
     _status: 'published',
+    template: 'default',
     tenant: tenantId,
     hero: {
       type: 'none',
