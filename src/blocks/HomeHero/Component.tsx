@@ -1,13 +1,34 @@
 import React, { type CSSProperties } from 'react'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 
 import type { HomeHeroBlock as HomeHeroBlockProps } from '@/payload-types'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
+import type { Media } from '@/payload-types'
+
+const resolveMediaDoc = async (
+  resource: HomeHeroBlockProps['background'] | HomeHeroBlockProps['logo'] | HomeHeroBlockProps['logoNude'],
+): Promise<Media | null> => {
+  if (!resource) return null
+  if (typeof resource === 'object' && 'filename' in resource) return resource as Media
+  if (typeof resource !== 'string' && typeof resource !== 'number') return null
+
+  const payload = await getPayload({ config: configPromise })
+  const media = await payload.findByID({
+    collection: 'media',
+    id: String(resource),
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  return media || null
+}
 
 const buildMediaUrl = (
-  resource: HomeHeroBlockProps['background'],
+  resource: Media | null,
   fallback?: string | null,
 ) => {
-  if (resource && typeof resource === 'object') {
+  if (resource) {
     const mediaPath = resource.filename
       ? `/api/media/file/${encodeURIComponent(resource.filename)}`
       : resource.url
@@ -17,8 +38,8 @@ const buildMediaUrl = (
   return fallback ?? undefined
 }
 
-const buildLogoSrc = (resource: HomeHeroBlockProps['logo']) => {
-  if (resource && typeof resource === 'object') {
+const buildLogoSrc = (resource: Media | null) => {
+  if (resource) {
     const mediaPath = resource.filename
       ? `/api/media/file/${encodeURIComponent(resource.filename)}`
       : resource.url
@@ -27,8 +48,8 @@ const buildLogoSrc = (resource: HomeHeroBlockProps['logo']) => {
   return undefined
 }
 
-const buildLogoNudeSrc = (resource: HomeHeroBlockProps['logoNude']) => {
-  if (resource && typeof resource === 'object') {
+const buildLogoNudeSrc = (resource: Media | null) => {
+  if (resource) {
     const mediaPath = resource.filename
       ? `/api/media/file/${encodeURIComponent(resource.filename)}`
       : resource.url
@@ -37,7 +58,7 @@ const buildLogoNudeSrc = (resource: HomeHeroBlockProps['logoNude']) => {
   return undefined
 }
 
-export const HomeHeroBlock: React.FC<HomeHeroBlockProps> = ({
+export const HomeHeroBlock = async ({
   background,
   backgroundUrl,
   buttonLabel,
@@ -47,10 +68,16 @@ export const HomeHeroBlock: React.FC<HomeHeroBlockProps> = ({
   logo,
   logoNude,
   tagline,
-}) => {
-  const heroImage = buildMediaUrl(background, backgroundUrl)
-  const logoSrc = buildLogoSrc(logo)
-  const nudeSrc = buildLogoNudeSrc(logoNude)
+}: HomeHeroBlockProps) => {
+  const [resolvedBackground, resolvedLogo, resolvedLogoNude] = await Promise.all([
+    resolveMediaDoc(background),
+    resolveMediaDoc(logo),
+    resolveMediaDoc(logoNude),
+  ])
+
+  const heroImage = buildMediaUrl(resolvedBackground, backgroundUrl)
+  const logoSrc = buildLogoSrc(resolvedLogo)
+  const nudeSrc = buildLogoNudeSrc(resolvedLogoNude)
 
   const heroStyle: CSSProperties = {
     backgroundColor: '#111',

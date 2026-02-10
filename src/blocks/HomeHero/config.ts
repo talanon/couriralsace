@@ -13,6 +13,7 @@ export const HomeHero: Block = {
       type: 'upload',
       label: 'Logo principal',
       relationTo: 'media',
+      maxDepth: 1,
       admin: {
         description: 'Image utilisée pour la marque (remplace les mots).',
       },
@@ -49,6 +50,7 @@ export const HomeHero: Block = {
       type: 'upload',
       label: 'Background image upload',
       relationTo: 'media',
+      maxDepth: 1,
     },
     {
       name: 'inputPlaceholder',
@@ -67,6 +69,7 @@ export const HomeHero: Block = {
       type: 'upload',
       label: 'Logo nue',
       relationTo: 'media',
+      maxDepth: 1,
       admin: {
         description: 'Image minimaliste placée en bas du hero.',
       },
