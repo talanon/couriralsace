@@ -43,13 +43,9 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
       blockType: 'homeHero',
       headline: 'Toutes les sorties trail & course à pied',
       highlightText: 'officielles... ou pas !',
-      footerSymbol: '∿',
       buttonLabel: 'Rester informé(e) !',
       inputPlaceholder: 'Votre adresse mail...',
       tagline: 'Le fil des sorties, officielles ou improvisées.',
-      logoPrimary: 'sortie',
-      logoSecondary: 'longue',
-      logoBadge: 'en Alsace',
       backgroundUrl:
         'https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=1600&q=80',
     },
