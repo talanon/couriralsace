@@ -26,7 +26,6 @@ import {
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   labels: {
-    label: 'Pages',
     singular: 'Page',
     plural: 'Pages',
   },

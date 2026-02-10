@@ -1,6 +1,6 @@
-import type { AfterChangeHook } from 'payload'
+import type { CollectionAfterChangeHook, RequiredDataFromCollectionSlug } from 'payload'
 
-import type { Page, Tenant } from '@/payload-types'
+import type { ContentBlock, FormBlock, Page, Tenant } from '@/payload-types'
 
 type PageTemplate = {
   slug: string
@@ -8,12 +8,25 @@ type PageTemplate = {
   body: string
 }
 
-type RichTextNode = Record<string, unknown>
+type RichTextNode = {
+  type: string
+  version: number
+  children?: RichTextNode[]
+  direction?: 'ltr' | 'rtl'
+  format?: '' | 'left' | 'start' | 'center' | 'right' | 'end' | 'justify'
+  indent?: number
+  text?: string
+  detail?: number
+  mode?: string
+  style?: string
+  tag?: string
+  [key: string]: unknown
+}
 
 const createTextNode = (text: string): RichTextNode => ({
   type: 'text',
   detail: 0,
-  format: 0,
+  format: '' as const,
   mode: 'normal',
   style: '',
   text,
@@ -42,16 +55,16 @@ const createParagraphNode = (text: string): RichTextNode => ({
 
 const createRichText = (children: RichTextNode[]) => ({
   root: {
-    type: 'root',
+    type: 'root' as const,
     children,
-    direction: 'ltr',
-    format: '',
+    direction: 'ltr' as const,
+    format: '' as const,
     indent: 0,
     version: 1,
   },
 })
 
-const contentBlock = (heading: string, body: string) => ({
+const contentBlock = (heading: string, body: string): ContentBlock => ({
   blockType: 'content',
   blockName: heading,
   columns: [
@@ -95,15 +108,15 @@ const pageTemplates = (tenantName: string): PageTemplate[] => [
   },
 ]
 
-const createContactFormBlock = (formId: number, tenantName: string) => ({
+const createContactFormBlock = (formId: number, tenantName: string): FormBlock => ({
   blockType: 'formBlock',
   blockName: 'Formulaire de contact',
+  form: formId,
   enableIntro: true,
   introContent: createRichText([
     createHeadingNode('Contact'),
     createParagraphNode(`Contactez l'équipe ${tenantName} via le formulaire ci-dessous.`),
   ]),
-  form: formId,
 })
 
 const createBasePage = (
@@ -111,8 +124,8 @@ const createBasePage = (
   template: PageTemplate,
   tenantName: string,
   contactFormId?: number,
-) => {
-  const layout = [contentBlock(template.title, template.body)]
+): RequiredDataFromCollectionSlug<'pages'> => {
+  const layout: (ContentBlock | FormBlock)[] = [contentBlock(template.title, template.body)]
 
   if (template.slug === 'contact' && contactFormId) {
     layout.push(createContactFormBlock(contactFormId, tenantName))
@@ -130,7 +143,10 @@ const createBasePage = (
   }
 }
 
-const registrationFormPayload = (tenantName: string, tenantId: number) => ({
+const registrationFormPayload = (
+  tenantName: string,
+  tenantId: number,
+): RequiredDataFromCollectionSlug<'forms'> => ({
   title: `Inscription - ${tenantName}`,
   submitButtonLabel: 'S’inscrire',
   confirmationType: 'message',
@@ -182,7 +198,10 @@ const registrationFormPayload = (tenantName: string, tenantId: number) => ({
   ],
 })
 
-const contactFormPayload = (tenantName: string, tenantId: number) => ({
+const contactFormPayload = (
+  tenantName: string,
+  tenantId: number,
+): RequiredDataFromCollectionSlug<'forms'> => ({
   title: `Contact - ${tenantName}`,
   submitButtonLabel: 'Envoyer',
   confirmationType: 'message',
@@ -225,7 +244,7 @@ const contactFormPayload = (tenantName: string, tenantId: number) => ({
   ],
 })
 
-const inscriptionLayout = (formId: number, tenantName: string) => [
+const inscriptionLayout = (formId: number, tenantName: string): (ContentBlock | FormBlock)[] => [
   contentBlock(
     'Inscription',
     `Prêt à participer aux épreuves ${tenantName} ? Remplissez le formulaire ci-dessous pour recevoir toutes les modalités d'inscription.`,
@@ -238,7 +257,7 @@ const inscriptionLayout = (formId: number, tenantName: string) => [
   },
 ]
 
-export const createTenantPages: AfterChangeHook<Tenant> = async ({ doc, operation, req }) => {
+export const createTenantPages: CollectionAfterChangeHook<Tenant> = async ({ doc, operation, req }) => {
   if (operation !== 'create' || !doc || !req) {
     return doc
   }
@@ -258,14 +277,14 @@ export const createTenantPages: AfterChangeHook<Tenant> = async ({ doc, operatio
     req,
   })
 
-  const basePagePayloads = pageTemplates(tenantName).map((template) =>
-    createBasePage(tenantId, template, tenantName, contactForm.id),
-  )
+  const basePagePayloads: RequiredDataFromCollectionSlug<'pages'>[] = pageTemplates(
+    tenantName,
+  ).map((template) => createBasePage(tenantId, template, tenantName, contactForm.id))
 
   const createdPages: Page[] = []
 
   for (const payload of basePagePayloads) {
-    const createdPage = await req.payload.create<Page>({
+    const createdPage = await req.payload.create({
       collection: 'pages',
       data: payload,
       req,
@@ -273,7 +292,7 @@ export const createTenantPages: AfterChangeHook<Tenant> = async ({ doc, operatio
     createdPages.push(createdPage)
   }
 
-  const inscriptionPage = {
+  const inscriptionPage: RequiredDataFromCollectionSlug<'pages'> = {
     title: 'Inscription',
     slug: 'inscription',
     _status: 'published',
@@ -290,11 +309,11 @@ export const createTenantPages: AfterChangeHook<Tenant> = async ({ doc, operatio
     req,
   })
 
-  const navItems = createdPages.map((page) => ({
+  const navItems: NonNullable<Tenant['navItems']> = createdPages.map((page) => ({
     link: {
-      type: 'reference',
+      type: 'reference' as const,
       reference: {
-        relationTo: 'pages',
+        relationTo: 'pages' as const,
         value: page,
       },
       label: page.title ?? page.slug,

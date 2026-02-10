@@ -1,12 +1,12 @@
 import type { AccessArgs, Where, PayloadRequest } from 'payload'
 
-import type { User } from '@/payload-types'
+import type { Tenant, User } from '@/payload-types'
 import { resolveTenant } from '@/utilities/resolveTenant'
 
-type TenantRelationship = string | { id?: string | null }
+type TenantRelationship = string | number | { id?: string | null } | Tenant | null
 type TenantMembership = {
   tenant?: TenantRelationship
-  role?: string
+  role?: string | null
 }
 
 const membershipCacheKey = '__courirTenantMemberships'
@@ -60,7 +60,10 @@ const getMemberships = (user?: User): TenantMembership[] => {
 
 export const getTenantIds = (user?: User): string[] => {
   const membershipIds = membershipTenantIds(getMemberships(user))
-  const legacyIds = Array.isArray(user?.tenants) ? membershipTenantIds(user.tenants as TenantRelationship[]) : []
+  const legacyTenants = (user as { tenants?: TenantRelationship[] } | undefined)?.tenants
+  const legacyIds = Array.isArray(legacyTenants)
+    ? legacyTenants.map((tenant) => normalizeTenantId(tenant)).filter((id): id is string => Boolean(id))
+    : []
 
   const ids = Array.from(new Set([...membershipIds, ...legacyIds]))
   return ids
@@ -110,14 +113,20 @@ export const hasTenantRole = (
 }
 
 
-export const isSuperAdmin = (user?: User) => Boolean(user?.roles?.includes('super-admin'))
+export const isSuperAdmin = (user?: User | null) =>
+  Boolean(user?.roles?.includes('super-admin'))
 
 const getTenantFieldValue = (value: TenantRelationship | undefined | null) => normalizeTenantId(value)
 
 const tenantHeaderFromReq = (req: AccessArgs['req']) =>
   typeof req.headers?.get === 'function' ? req.headers.get('x-courir-tenant-id') : null
 
-export const getTenantIdFromArgs = (args: AccessArgs): string | null => {
+type TenantAccessArgs = AccessArgs & {
+  doc?: { tenant?: TenantRelationship | { id?: string | null } }
+  data?: { tenant?: TenantRelationship | { id?: string | null } }
+}
+
+export const getTenantIdFromArgs = (args: TenantAccessArgs): string | null => {
   const { doc, data, req } = args
   const headerTenant = tenantHeaderFromReq(req)
   if (headerTenant) {

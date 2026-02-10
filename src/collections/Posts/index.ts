@@ -30,7 +30,6 @@ import { slugField } from 'payload'
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   labels: {
-    label: 'Articles',
     singular: 'Article',
     plural: 'Articles',
   },

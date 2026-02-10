@@ -10,6 +10,7 @@ import type { Props as MediaProps } from '../types'
 
 import { cssVariables } from '@/cssVariables'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
+import { useMediaOrigin } from '@/providers/MediaOrigin'
 
 const { breakpoints } = cssVariables
 
@@ -58,6 +59,8 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
     loading: loadingFromProps,
   } = props
 
+  const mediaOrigin = useMediaOrigin()
+
   let width: number | undefined
   let height: number | undefined
   let alt = altFromProps
@@ -72,7 +75,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
 
     const cacheTag = resource.updatedAt
 
-    src = getMediaUrl(url, cacheTag)
+    src = getMediaUrl(url, cacheTag, mediaOrigin)
   }
 
   const loading = loadingFromProps || (!priority ? 'lazy' : undefined)

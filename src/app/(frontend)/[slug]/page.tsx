@@ -10,6 +10,7 @@ import { homeStatic } from '@/endpoints/seed/home-static'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
+import { normalizeTenantId } from '@/access/tenants'
 import { resolveTenant } from '@/utilities/resolveTenant'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -59,7 +60,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   page = await queryPageBySlug({
     slug: decodedSlug,
-    tenantId: tenant?.id,
+    tenantId: tenant?.id ? String(tenant.id) : undefined,
   })
 
   // Remove this code once your website is seeded
@@ -67,7 +68,11 @@ export default async function Page({ params: paramsPromise }: Args) {
     page = homeStatic
   }
 
-  const tenantMismatch = Boolean(page?.tenant?.id && page.tenant.id !== tenant?.id)
+  const normalizedPageTenantId = normalizeTenantId(page?.tenant)
+  const normalizedTenantId = tenant?.id ? String(tenant.id) : undefined
+  const tenantMismatch = Boolean(
+    normalizedPageTenantId && normalizedTenantId && normalizedPageTenantId !== normalizedTenantId,
+  )
 
   if (!page || tenantMismatch) {
     return <PayloadRedirects url={url} />
@@ -98,10 +103,12 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const tenant = await resolveTenant(host)
   const page = await queryPageBySlug({
     slug: decodedSlug,
-    tenantId: tenant?.id,
+    tenantId: tenant?.id ? String(tenant.id) : undefined,
   })
 
-  if (!page || (page.tenant?.id && page.tenant.id !== tenant?.id)) {
+  const normalizedPageTenantId = normalizeTenantId(page?.tenant)
+  const normalizedTenantId = tenant?.id ? String(tenant.id) : undefined
+  if (!page || (normalizedPageTenantId && normalizedTenantId && normalizedPageTenantId !== normalizedTenantId)) {
     return generateMeta({ doc: null })
   }
 

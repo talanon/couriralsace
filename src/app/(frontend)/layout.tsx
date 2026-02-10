@@ -20,8 +20,13 @@ import { getServerSideURL } from '@/utilities/getURL'
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
   const requestHeaders = await headers()
-  const host = requestHeaders.get('host')
+  const hostHeader = requestHeaders.get('host')
+  const baseURL = new URL(getServerSideURL())
+  const host = hostHeader || baseURL.host
   const tenant = await resolveTenant(host)
+  const forwardedProto = requestHeaders.get('x-forwarded-proto')
+  const protocol = forwardedProto || baseURL.protocol.replace(':', '')
+  const mediaOrigin = `${protocol}://${host}`
 
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
@@ -31,7 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
       <body>
-        <Providers>
+        <Providers mediaOrigin={mediaOrigin}>
           <AdminBar
             adminBarProps={{
               preview: isEnabled,
@@ -43,8 +48,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Footer />
         </Providers>
       </body>
-    </html>
-  )
+  </html>
+)
 }
 
 export const metadata: Metadata = {

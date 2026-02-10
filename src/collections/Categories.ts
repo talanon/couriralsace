@@ -6,7 +6,6 @@ import { slugField } from 'payload'
 export const Categories: CollectionConfig = {
   slug: 'categories',
   labels: {
-    label: 'Catégories',
     singular: 'Catégorie',
     plural: 'Catégories',
   },

@@ -4,6 +4,7 @@ import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { Plugin } from 'payload'
+import type { Field } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { assignTenantFromUser } from '@/hooks/assignTenant'
 import { requireTenantField } from '@/hooks/requireTenant'
@@ -29,10 +30,10 @@ const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
 
 const tenantFormRoles = ['admin', 'organizer']
 
-const tenantFormField = {
+const tenantFormField: Field = {
   name: 'tenant',
-  type: 'relationship',
-  relationTo: 'tenants',
+  type: 'relationship' as const,
+  relationTo: 'tenants' as const,
   admin: {
     hidden: true,
   },
@@ -43,7 +44,6 @@ export const plugins: Plugin[] = [
     collections: ['pages', 'posts'],
     overrides: {
       labels: {
-        label: 'Redirections',
         singular: 'Redirection',
         plural: 'Redirections',
       },
@@ -86,7 +86,6 @@ export const plugins: Plugin[] = [
     },
     formOverrides: {
       labels: {
-        label: 'Formulaires',
         singular: 'Formulaire',
         plural: 'Formulaires',
       },
@@ -133,7 +132,6 @@ export const plugins: Plugin[] = [
     },
     formSubmissionOverrides: {
       labels: {
-        label: 'Soumissions de formulaires',
         singular: 'Soumission de formulaire',
         plural: 'Soumissions de formulaires',
       },
@@ -150,7 +148,6 @@ export const plugins: Plugin[] = [
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       labels: {
-        label: 'Résultats de recherche',
         singular: 'Résultat de recherche',
         plural: 'Résultats de recherche',
       },

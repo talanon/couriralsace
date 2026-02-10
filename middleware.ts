@@ -15,8 +15,9 @@ export async function middleware(req: NextRequest) {
   }
 
   const response = NextResponse.next()
-  response.headers.set('x-courir-tenant-id', tenant.id)
-  response.headers.set('x-courir-tenant-slug', tenant.slug)
+  response.headers.set('x-courir-tenant-id', String(tenant.id))
+  const tenantSlug = tenant.domains?.[0]?.host ?? tenant.name ?? ''
+  response.headers.set('x-courir-tenant-slug', tenantSlug)
   response.headers.set('x-courir-tenant-name', tenant.name ?? '')
 
   return response

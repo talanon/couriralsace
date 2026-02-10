@@ -5,17 +5,18 @@ import crypto from 'crypto'
 import type { Payload, PayloadRequest } from 'payload'
 import { getPayload } from 'payload'
 
-import config from '../src/payload.config'
+import configPromise from '../src/payload.config'
+import type { User } from '../src/payload-types'
 
 const limit = 200
+const defaultI18n = {
+  t: (key: string) => key,
+} as unknown as PayloadRequest['i18n']
 
-const buildUrlBase = (): string =>
-  config.serverURL && config.serverURL.length ? config.serverURL : 'http://localhost:3000'
-
-const payloadPromise = getPayload({ config })
+const payloadPromise = getPayload({ config: configPromise })
 
 async function main() {
-  const payload = await payloadPromise
+  const payload = (await payloadPromise) as Payload
   const usersCollection = payload.collections.users
 
   if (!usersCollection?.config.auth?.verify) {
@@ -27,19 +28,26 @@ async function main() {
     throw new Error('No email adapter configured')
   }
 
-  const { generateEmailSubject, generateEmailHTML } = usersCollection.config.auth.verify
-  const baseUrl = buildUrlBase()
-  const buildReq = (user?: { id: number; email: string; collection?: string }) => {
-    const req: PayloadRequest = {
+  const verifyConfig = usersCollection.config.auth.verify
+  if (verifyConfig === true) {
+    throw new Error('Users collection auth.verify must be configured with a verify route')
+  }
+  const { generateEmailSubject, generateEmailHTML } = verifyConfig
+  const resolvedConfig = await configPromise
+  const baseUrl =
+    resolvedConfig.serverURL && resolvedConfig.serverURL.length
+      ? resolvedConfig.serverURL
+      : 'http://localhost:3000'
+  const buildReq = (user?: User | null) => {
+    const req = {
       url: `${baseUrl}/api/tenants/resend-verifications`,
       headers: new Headers(),
       method: 'POST',
       payload,
       payloadAPI: 'local',
-      payloadDataLoader: payload.payloadDataLoader ?? undefined,
       context: {},
-      i18n: payload.i18n,
-      t: payload.i18n?.t ?? ((key: string) => key),
+      i18n: defaultI18n,
+      t: defaultI18n.t,
       user: user
         ? {
             ...user,
@@ -47,7 +55,7 @@ async function main() {
           }
         : null,
     }
-    return req
+    return req as PayloadRequest
   }
   const req = buildReq()
 
@@ -89,7 +97,7 @@ async function main() {
         returning: true,
       })
 
-      const localizedReq = buildReq(updated as { id: number; email: string })
+      const localizedReq = buildReq(updated as User)
 
       const subject =
         typeof generateEmailSubject === 'function'

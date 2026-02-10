@@ -15,7 +15,6 @@ export const Tenants: CollectionConfig = {
     update: (args) => restrictToUserTenants(args, { field: 'id', roles: ['admin'] }),
   },
   labels: {
-    label: 'Organisateurs',
     singular: 'Organisateur',
     plural: 'Organisateurs',
   },
@@ -116,7 +115,6 @@ export const Tenants: CollectionConfig = {
       type: 'ui',
       label: 'Affiliations à l’organisation',
       admin: {
-        description: 'Gère les utilisateurs liés à ce tenant sans quitter cette fiche.',
         components: {
           Field: '@/components/Tenants/Members',
         },

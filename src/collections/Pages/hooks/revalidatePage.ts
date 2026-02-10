@@ -5,10 +5,10 @@ import { getRevalidateModule } from '@/utilities/getRevalidateFunction'
 import type { Page } from '../../../payload-types'
 
 const runRevalidate = async (paths: string[], payload: Payload['logger']) => {
-  const module = await getRevalidateModule()
-  if (!module) return
+  const revalidateModule = await getRevalidateModule()
+  if (!revalidateModule) return
 
-  const { revalidatePath, revalidateTag } = module
+  const { revalidatePath, revalidateTag } = revalidateModule
   for (const path of paths) {
     if (revalidatePath) {
       revalidatePath(path)

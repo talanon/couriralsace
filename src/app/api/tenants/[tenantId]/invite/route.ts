@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@payload-config'
+import type { User } from '@/payload-types'
 
 const validRoles = ['admin', 'organizer', 'viewer'] as const
 type Role = (typeof validRoles)[number]
@@ -46,15 +47,10 @@ const buildMemberships = (
   return [...next, { tenant: tenantIdentifier, role }]
 }
 
-const requireTenantId = (tenantId?: string) =>
-  Boolean(tenantId) ? tenantId : undefined
-
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { tenantId: string } },
-) {
-  const payload = await getPayload({ config, req })
-  const { tenantId } = await params
+export async function POST(req: NextRequest, context: any) {
+  const payload = await getPayload({ config })
+  const { params } = context
+  const { tenantId } = params
 
   if (!tenantId) {
     return NextResponse.json(
@@ -110,7 +106,7 @@ export async function POST(
       collection: 'users',
       id: existingUser.id,
       data: {
-        tenantMemberships: updatedMemberships,
+        tenantMemberships: updatedMemberships as User['tenantMemberships'],
       },
       req,
       overrideAccess: true,
@@ -131,7 +127,7 @@ export async function POST(
         name: formattedName,
         password: generatedPassword,
         roles: [globalRole],
-        tenantMemberships: [{ tenant: normalizedTenantValue, role }],
+        tenantMemberships: [{ tenant: normalizedTenantValue, role }] as User['tenantMemberships'],
       },
       req,
       overrideAccess: true,

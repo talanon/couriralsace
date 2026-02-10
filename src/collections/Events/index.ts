@@ -8,7 +8,6 @@ import { superAdminOnly } from '../../access'
 export const Events: CollectionConfig = {
   slug: 'events',
   labels: {
-    label: 'Événements',
     singular: 'Événement',
     plural: 'Événements',
   },
@@ -29,7 +28,7 @@ export const Events: CollectionConfig = {
       required: true,
       label: 'Titre',
     },
-    slugField({ generateFrom: 'title' }),
+    slugField(),
     {
       name: 'tenant',
       type: 'relationship',

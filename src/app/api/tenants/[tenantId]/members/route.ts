@@ -9,9 +9,10 @@ const toNumber = (value: string | null, fallback: number) => {
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
-export async function GET(req: NextRequest, { params }: { params: { tenantId: string } }) {
-  const payload = await getPayload({ config, req })
-  const { tenantId } = await params
+export async function GET(req: NextRequest, context: any) {
+  const payload = await getPayload({ config })
+  const { params } = context
+  const { tenantId } = params
 
   if (!req.headers.get('cookie')) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })

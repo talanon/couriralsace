@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { normalizeTenantId } from '@/access/clientTenants'
-import type { User } from '@/payload-types'
+import type { Tenant, User } from '@/payload-types'
 import { useDocumentInfo, useTranslation } from '@payloadcms/ui'
 import { PlusIcon } from '@payloadcms/ui'
 import { TrashIcon } from '@payloadcms/ui/icons/Trash'
@@ -18,8 +18,9 @@ const roles = [
 ]
 
 type TenantMembership = {
-  tenant?: string | number | null | Record<string, unknown>
+  tenant?: string | number | Tenant | null | Record<string, unknown>
   role?: string | null
+  id?: string | null
 }
 
 type MemberRow = User & {
@@ -32,7 +33,11 @@ const getTenantIdString = (value: string | number | null | undefined) => {
 }
 
 const getMembershipForTenant = (user: MemberRow, tenantId: string) =>
-  user.tenantMemberships?.find((membership) => normalizeTenantId(membership?.tenant) === tenantId)
+  user.tenantMemberships?.find(
+    (membership) =>
+      normalizeTenantId(membership?.tenant as Parameters<typeof normalizeTenantId>[0]) ===
+      tenantId,
+  )
 
 const TenantMembersPanel: React.FC = () => {
   const { id: tenantId } = useDocumentInfo()
@@ -71,7 +76,7 @@ const TenantMembersPanel: React.FC = () => {
       setMembers(data.docs ?? [])
     } catch (caught) {
       console.error(caught)
-      setError(t('general:unableToLoad', { label: 'membres' }))
+      setError('Impossible de charger les membres')
     } finally {
       setLoading(false)
     }
@@ -141,7 +146,11 @@ const TenantMembersPanel: React.FC = () => {
 
       const nextMemberships = (member.tenantMemberships ?? [])
         .map((membership) => {
-          if (normalizeTenantId(membership?.tenant) !== tenantIdString) {
+          if (
+            normalizeTenantId(
+              membership?.tenant as Parameters<typeof normalizeTenantId>[0],
+            ) !== tenantIdString
+          ) {
             return membership
           }
           return updater(membership)

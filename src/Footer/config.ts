@@ -6,11 +6,7 @@ import { revalidateFooter } from './hooks/revalidateFooter'
 
 export const Footer: GlobalConfig = {
   slug: 'footer',
-  labels: {
-    label: 'Pied de page',
-    singular: 'Pied de page',
-    plural: 'Pieds de page',
-  },
+  label: 'Pied de page',
   access: {
     read: superAdminOnly,
     update: superAdminOnly,

@@ -3,12 +3,10 @@ import { getPayload } from 'payload'
 
 import config from '@payload-config'
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { tenantId: string; memberId: string } },
-) {
-  const payload = await getPayload({ config, req })
-  const { tenantId, memberId } = await params
+export async function PATCH(req: NextRequest, context: any) {
+  const payload = await getPayload({ config })
+  const { params } = context
+  const { memberId } = params
 
   if (!req.headers.get('cookie')) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })

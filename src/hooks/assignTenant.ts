@@ -1,4 +1,4 @@
-import type { Hook } from 'payload'
+import type { CollectionBeforeValidateHook } from 'payload'
 
 import {
   getTenantIdFromRequest,
@@ -35,7 +35,7 @@ const hasTenantValue = (data?: Record<string, unknown>) => {
   return true
 }
 
-export const assignTenantFromUser: Hook = async ({ req, data }) => {
+export const assignTenantFromUser: CollectionBeforeValidateHook = async ({ req, data }) => {
   if (!data) return
 
   const requestTenantId = coerceTenantId(await getTenantIdFromRequest(req))

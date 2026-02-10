@@ -6,11 +6,7 @@ import { revalidateHeader } from './hooks/revalidateHeader'
 
 export const Header: GlobalConfig = {
   slug: 'header',
-  labels: {
-    label: 'En-tête',
-    singular: 'En-tête',
-    plural: 'En-têtes',
-  },
+  label: 'En-tête',
   access: {
     read: superAdminOnly,
     update: superAdminOnly,

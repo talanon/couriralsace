@@ -1,7 +1,13 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import sharp from 'sharp'
 import path from 'path'
-import { buildConfig, type AccessArgs, type CollectionConfig, PayloadRequest } from 'payload'
+import {
+  buildConfig,
+  type AccessArgs,
+  type CollectionConfig,
+  type Field,
+  PayloadRequest,
+} from 'payload'
 import { en } from '@payloadcms/translations/languages/en'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { fileURLToPath } from 'url'
@@ -57,15 +63,19 @@ const assignTenantToFolder = async ({
   return data
 }
 
-const folderCollectionOverrides = [
-  ({ collection }: { collection: CollectionConfig }) => {
-    const tenantField = {
-      name: 'tenant',
-      type: 'relationship',
-      relationTo: 'tenants',
+type FolderCollectionOverride = (args: {
+  collection: Omit<CollectionConfig, 'trash'>
+}) => Omit<CollectionConfig, 'trash'> | Promise<Omit<CollectionConfig, 'trash'>>
+
+const folderCollectionOverrides: FolderCollectionOverride[] = [
+  ({ collection }) => {
+  const tenantField: Field = {
+    name: 'tenant',
+    type: 'relationship',
+    relationTo: 'tenants' as const,
       admin: {
         description: 'Tenant propriétaire du dossier (assigné automatiquement).',
-        position: 'sidebar',
+        position: 'sidebar' as const,
         condition: (_data: unknown, _siblingData: unknown, { user }: { user?: PayloadRequest['user'] }) =>
           Boolean(user && isSuperAdmin(user)),
       },
@@ -163,7 +173,6 @@ export default buildConfig({
   editor: defaultLexical,
   i18n: {
     fallbackLanguage: 'en',
-    defaultLocale: 'fr',
     supportedLanguages: {
       en,
       fr,
@@ -171,7 +180,7 @@ export default buildConfig({
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
+      connectionString: process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL || '',
     },
   }),
   collections: [Pages, Posts, Media, Categories, Users, Tenants, Events],

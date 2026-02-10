@@ -1,28 +1,30 @@
 import 'dotenv/config'
 
-import type { Payload, PayloadRequest } from 'payload'
+import type { Payload, PayloadRequest, Where } from 'payload'
 import { getPayload } from 'payload'
 
-import type { Page } from '../src/payload-types'
+import type { Page, Tenant } from '../src/payload-types'
 import { createTenantPages } from '../src/hooks/createTenantPages'
-import config from '../src/payload.config'
+import configPromise from '../src/payload.config'
 
-const payloadPromise = getPayload({ config })
+const defaultI18n = {
+  t: (key: string) => key,
+} as unknown as PayloadRequest['i18n']
 
-const buildRequest = (payload: Payload): PayloadRequest => {
-  const baseUrl = config.serverURL || 'http://localhost:3000'
+const payloadPromise = getPayload({ config: configPromise })
+
+const buildRequest = (payload: Payload, baseUrl: string): PayloadRequest => {
   return {
     url: `${baseUrl}/api/tenants/reset`,
     method: 'POST',
     headers: new Headers(),
     payload,
     payloadAPI: 'local',
-    payloadDataLoader: payload.payloadDataLoader ?? undefined,
     context: {},
-    i18n: payload.i18n,
-    t: payload.i18n?.t ?? ((key: string) => key),
+    i18n: defaultI18n,
+    t: defaultI18n.t,
     body: undefined,
-  }
+  } as PayloadRequest
 }
 
 const collectFormIds = (pages: Page[]) => {
@@ -54,9 +56,9 @@ const usage = () => {
 
 const isIsoNumeric = (value: string) => /^\\d+$/.test(value)
 
-const buildTenantWhereClause = (identifier: string) => {
+const buildTenantWhereClause = (identifier: string): Where => {
   if (isIsoNumeric(identifier)) {
-    return { id: { equals: Number(identifier) } }
+    return { id: { equals: Number(identifier) } } as Where
   }
 
   return {
@@ -64,7 +66,7 @@ const buildTenantWhereClause = (identifier: string) => {
       { name: { equals: identifier } },
       { domains: { host: { contains: identifier } } },
     ],
-  }
+  } as Where
 }
 
 const deleteSubmissionsForForm = async (
@@ -165,8 +167,10 @@ const main = async () => {
     usage()
   }
 
-  const payload = await payloadPromise
-  const req = buildRequest(payload)
+  const payload = (await payloadPromise) as Payload
+  const resolvedConfig = await configPromise
+  const baseUrl = resolvedConfig.serverURL || 'http://localhost:3000'
+  const req = buildRequest(payload, baseUrl)
   req.context.disableRevalidate = true
 
   const whereClause = buildTenantWhereClause(identifier)
@@ -181,7 +185,7 @@ const main = async () => {
     where: whereClause,
   })
 
-  const tenant = tenantResult.docs?.[0] ?? null
+  const tenant = (tenantResult.docs?.[0] ?? null) as Tenant | null
 
   if (!tenant) {
     payload.logger.error('Tenant not found')
@@ -190,9 +194,14 @@ const main = async () => {
   }
 
   await deleteTenantPages(payload, req, tenant.id)
-  await createTenantPages({ doc: tenant, operation: 'create', req })
+  await createTenantPages({
+    doc: tenant,
+    operation: 'create',
+    req,
+  } as Parameters<typeof createTenantPages>[0])
 
-  payload.logger.info(`Tenant ${tenant.slug} (${tenant.id}) has been reset.`)
+  const tenantLabel = tenant.name ?? tenant.domains?.[0]?.host ?? String(tenant.id)
+  payload.logger.info(`Tenant ${tenantLabel} (${tenant.id}) has been reset.`)
   await payload.destroy()
 }
 

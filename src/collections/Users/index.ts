@@ -4,11 +4,15 @@ import { formatAdminURL } from 'payload/shared'
 
 import { getTenantIdsFromMemberships, requireTenantRole, isSuperAdmin } from '../../access/tenants'
 
-const canReadOrUpdateSelf = ({ req, id }: AccessArgs): boolean => {
+type UserAccessArgs = Omit<AccessArgs, 'id'> & {
+  id?: number | 'me'
+}
+
+const canReadOrUpdateSelf = ({ req, id }: UserAccessArgs): boolean => {
   if (!req?.user) return false
 
   if (id === 'me') return true
-  if (id && req.user.id === id) return true
+  if (typeof id === 'number' && req.user.id === id) return true
 
   return isSuperAdmin(req.user)
 }
@@ -16,7 +20,6 @@ const canReadOrUpdateSelf = ({ req, id }: AccessArgs): boolean => {
 export const Users: CollectionConfig = {
   slug: 'users',
   labels: {
-    label: 'Utilisateurs',
     singular: 'Utilisateur',
     plural: 'Utilisateurs',
   },

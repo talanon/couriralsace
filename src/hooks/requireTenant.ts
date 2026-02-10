@@ -1,8 +1,8 @@
-import type { Hook } from 'payload'
+import type { CollectionBeforeValidateHook } from 'payload'
 
 import { isSuperAdmin } from '@/access/tenants'
 
-export const requireTenantField: Hook = ({ data, req }) => {
+export const requireTenantField: CollectionBeforeValidateHook = ({ data, req }) => {
   if (isSuperAdmin(req?.user)) return data
   if (!data) return data
   if (!data.tenant) {

@@ -65,10 +65,13 @@ export const AdminNav: React.FC<AdminNavProps> = async (props) => {
     ? globals.filter((global) => !restrictedGlobals.has(global.slug))
     : globals
 
+  const visibleCollectionSlugs = visibleEntities?.collections ?? []
+  const visibleGlobalSlugs = visibleEntities?.globals ?? []
+
   const groups = groupNavItems(
     [
       ...navCollections
-        .filter(({ slug }) => visibleEntities.collections.includes(slug))
+        .filter(({ slug }) => visibleCollectionSlugs.includes(slug))
         .map(
           (collection) =>
             ({
@@ -77,7 +80,7 @@ export const AdminNav: React.FC<AdminNavProps> = async (props) => {
             }) satisfies EntityToGroup,
         ),
       ...navGlobals
-        .filter(({ slug }) => visibleEntities.globals.includes(slug))
+        .filter(({ slug }) => visibleGlobalSlugs.includes(slug))
         .map(
           (global) =>
             ({
@@ -86,7 +89,7 @@ export const AdminNav: React.FC<AdminNavProps> = async (props) => {
             }) satisfies EntityToGroup,
         ),
     ],
-    permissions,
+    permissions ?? ({} as any),
     i18n,
   )
 
@@ -212,7 +215,7 @@ export const AdminNav: React.FC<AdminNavProps> = async (props) => {
       {RenderedBeforeNav}
       <nav className={`${baseClass}__wrap`}>
         {RenderedBeforeNavLinks}
-        <DefaultNavClient groups={groups} navPreferences={navPreferences} />
+        <DefaultNavClient groups={groups} navPreferences={navPreferences ?? ({} as any)} />
         {RenderedAfterNavLinks}
         <div className={`${baseClass}__controls`}>
           <SettingsMenuButton settingsMenu={RenderedSettingsMenu} />

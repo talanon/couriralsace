@@ -1,24 +1,30 @@
-import { getClientSideURL } from '@/utilities/getURL'
+const appendCacheTag = (base: string, cacheTag?: string | null) => {
+  if (!cacheTag) {
+    return base
+  }
+
+  const separator = base.includes('?') ? '&' : '?'
+  return `${base}${separator}${cacheTag}`
+}
 
 /**
  * Processes media resource URL to ensure proper formatting
- * @param url The original URL from the resource
- * @param cacheTag Optional cache tag to append to the URL
- * @returns Properly formatted URL with cache tag if provided
  */
-export const getMediaUrl = (url: string | null | undefined, cacheTag?: string | null): string => {
+export const getMediaUrl = (
+  url: string | null | undefined,
+  cacheTag?: string | null,
+  origin?: string,
+): string => {
   if (!url) return ''
 
   if (cacheTag && cacheTag !== '') {
     cacheTag = encodeURIComponent(cacheTag)
   }
 
-  // Check if URL already has http/https protocol
   if (url.startsWith('http://') || url.startsWith('https://')) {
-    return cacheTag ? `${url}?${cacheTag}` : url
+    return appendCacheTag(url, cacheTag)
   }
 
-  // Otherwise prepend client-side URL
-  const baseUrl = getClientSideURL()
-  return cacheTag ? `${baseUrl}${url}?${cacheTag}` : `${baseUrl}${url}`
+  const base = origin ? `${origin}${url}` : url
+  return appendCacheTag(base, cacheTag)
 }
