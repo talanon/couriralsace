@@ -2,7 +2,7 @@ import pg from 'pg'
 
 const { Client } = pg
 
-const connectionString = process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL
+const connectionString = process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL
 
 if (!connectionString) {
   console.warn('[migrations] DATABASE_URL/NETLIFY_DATABASE_URL is missing, skipping dev marker cleanup.')

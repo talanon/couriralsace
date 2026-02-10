@@ -188,7 +188,7 @@ export default buildConfig({
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL || '',
+      connectionString: process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL || '',
     },
   }),
   collections: [Pages, Posts, Media, Categories, Users, Tenants, Events],
