@@ -31,6 +31,12 @@ export const Media: CollectionConfig = {
     create: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
     delete: (args) => requireTenantRole(args, undefined, ['admin', 'organizer']),
     read: async (args) => {
+      const requestURL = args.req?.url ?? ''
+      if (requestURL.includes('/api/media/file/')) {
+        // Public asset delivery route must stay accessible for website rendering.
+        return true
+      }
+
       if (args.req.user) {
         return restrictToUserTenants(args, { field: 'tenant' })
       }
