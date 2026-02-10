@@ -119,6 +119,23 @@ export const Users: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return data
+
+        // Payload first-register can submit empty array fields as `0`.
+        if (data.tenantMemberships === 0) {
+          data.tenantMemberships = []
+        } else if (
+          typeof data.tenantMemberships !== 'undefined' &&
+          !Array.isArray(data.tenantMemberships)
+        ) {
+          data.tenantMemberships = []
+        }
+
+        return data
+      },
+    ],
     beforeChange: [
       ({ data }) => {
         if (!data) return
