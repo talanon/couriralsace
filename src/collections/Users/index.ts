@@ -120,8 +120,22 @@ export const Users: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      ({ data }) => {
+      ({ data, req }) => {
         if (!data) return data
+
+        const requestURL = req?.url ?? ''
+        const isFirstRegister = requestURL.includes('/api/users/first-register')
+
+        if (isFirstRegister) {
+          req.payload.logger.info({
+            msg: 'users.beforeValidate(first-register): incoming payload',
+            tenantMembershipsType: typeof data.tenantMemberships,
+            tenantMembershipsIsArray: Array.isArray(data.tenantMemberships),
+            roles: Array.isArray(data.roles) ? data.roles : [],
+            hasEmail: typeof data.email === 'string' && data.email.length > 0,
+            hasPassword: typeof data.password === 'string' && data.password.length > 0,
+          })
+        }
 
         // Payload first-register can submit empty array fields as `0`.
         if (data.tenantMemberships === 0) {
@@ -133,14 +147,30 @@ export const Users: CollectionConfig = {
           data.tenantMemberships = []
         }
 
+        if (isFirstRegister) {
+          req.payload.logger.info({
+            msg: 'users.beforeValidate(first-register): normalized payload',
+            tenantMembershipsType: typeof data.tenantMemberships,
+            tenantMembershipsIsArray: Array.isArray(data.tenantMemberships),
+            tenantMembershipsLength: Array.isArray(data.tenantMemberships) ? data.tenantMemberships.length : null,
+          })
+        }
+
         return data
       },
     ],
     beforeChange: [
-      ({ data }) => {
+      ({ data, req }) => {
         if (!data) return
         if (Array.isArray(data.tenantMemberships)) {
           data.tenants = Array.from(new Set(getTenantIdsFromMemberships(data.tenantMemberships)))
+        }
+
+        if ((req?.url ?? '').includes('/api/users/first-register')) {
+          req.payload.logger.info({
+            msg: 'users.beforeChange(first-register): computed tenant ids',
+            tenantsLength: Array.isArray((data as any).tenants) ? (data as any).tenants.length : 0,
+          })
         }
         return data
       },

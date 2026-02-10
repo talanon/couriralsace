@@ -197,6 +197,23 @@ export default buildConfig({
   },
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
+  hooks: {
+    afterError: [
+      async ({ error, req }) => {
+        const requestURL = req?.url ?? ''
+
+        if (requestURL.includes('/api/users/first-register')) {
+          req.payload.logger.error({
+            msg: 'first-register request failed',
+            method: req?.method,
+            url: requestURL,
+            errorName: error instanceof Error ? error.name : 'UnknownError',
+            errorMessage: error instanceof Error ? error.message : String(error),
+          })
+        }
+      },
+    ],
+  },
   plugins,
   email:
     mailerTransport !== null
