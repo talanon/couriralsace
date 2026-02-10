@@ -15,6 +15,7 @@
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation next lint --fix",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "db:clear-dev-migration": "node ./scripts/clear-dev-migration-marker.mjs",
     "reset:tenant": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/reset-tenant.ts",
     "db:drop-tenant-slug-index": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/drop-tenant-slug-index.ts",
     "db:drop-tenant-slug-column": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/remove-tenant-slug-column.ts",
