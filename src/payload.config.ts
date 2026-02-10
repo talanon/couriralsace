@@ -121,12 +121,39 @@ const folderCollectionOverrides: FolderCollectionOverride[] = [
 const mailerDsn = process.env.MAILER_DSN
 const defaultFromAddress = process.env.MAILER_FROM ?? 'no-reply@couriralsace.local'
 const defaultFromName = process.env.MAILER_FROM_NAME ?? 'Courir Alsace'
+const mailerDebugEnabled = process.env.MAILER_DEBUG === '1'
 const mailerIsMasked = (value?: string | null) => {
   if (!value) {
     return true
   }
   const trimmed = value.trim()
   return !trimmed || trimmed === '****' || trimmed.includes('****')
+}
+
+const getSafeMailerConfig = (dsn?: string) => {
+  if (!dsn) {
+    return { missingDsn: true }
+  }
+
+  try {
+    const parsed = new URL(dsn)
+    return {
+      protocol: parsed.protocol.replace(':', ''),
+      host: parsed.hostname,
+      port: parsed.port || '(default)',
+      username: parsed.username ? 'set' : 'missing',
+      hasPassword: Boolean(parsed.password),
+    }
+  } catch {
+    return { invalidDsn: true }
+  }
+}
+
+const redactEmail = (value?: string | null) => {
+  if (!value) return null
+  const atIndex = value.indexOf('@')
+  if (atIndex === -1) return 'invalid-email'
+  return `***@${value.slice(atIndex + 1)}`
 }
 
 const mailerTransport =
@@ -223,10 +250,45 @@ export default buildConfig({
           defaultFromName: defaultFromName,
           async sendEmail(message) {
             const normalizedFrom = message.from ?? `${defaultFromName} <${defaultFromAddress}>`
-            await mailerTransport.sendMail({
-              ...message,
-              from: normalizedFrom,
-            })
+            if (mailerDebugEnabled) {
+              console.info('[mailer] sending email', {
+                config: getSafeMailerConfig(mailerDsn),
+                from: redactEmail(normalizedFrom),
+                to:
+                  typeof message.to === 'string'
+                    ? redactEmail(message.to)
+                    : Array.isArray(message.to)
+                    ? message.to.map((entry: unknown) =>
+                        typeof entry === 'string' ? redactEmail(entry) : 'address-object',
+                      )
+                    : message.to
+                    ? 'address-object'
+                    : null,
+                subject: message.subject ?? null,
+              })
+            }
+
+            try {
+              await mailerTransport.sendMail({
+                ...message,
+                from: normalizedFrom,
+              })
+            } catch (error) {
+              console.error('[mailer] send failed', {
+                config: getSafeMailerConfig(mailerDsn),
+                errorName: error instanceof Error ? error.name : 'UnknownError',
+                errorMessage: error instanceof Error ? error.message : String(error),
+                responseCode:
+                  error && typeof error === 'object' && 'responseCode' in error
+                    ? (error as { responseCode?: unknown }).responseCode
+                    : null,
+                response:
+                  error && typeof error === 'object' && 'response' in error
+                    ? (error as { response?: unknown }).response
+                    : null,
+              })
+              throw error
+            }
           },
         })
       : undefined,
