@@ -8,7 +8,10 @@ const buildMediaUrl = (
   fallback?: string | null,
 ) => {
   if (resource && typeof resource === 'object') {
-    return getMediaUrl(resource.url, resource.updatedAt)
+    const mediaPath = resource.filename
+      ? `/api/media/file/${encodeURIComponent(resource.filename)}`
+      : resource.url
+    return getMediaUrl(mediaPath, resource.updatedAt)
   }
 
   return fallback ?? undefined
@@ -16,14 +19,20 @@ const buildMediaUrl = (
 
 const buildLogoSrc = (resource: HomeHeroBlockProps['logo']) => {
   if (resource && typeof resource === 'object') {
-    return getMediaUrl(resource.url, resource.updatedAt)
+    const mediaPath = resource.filename
+      ? `/api/media/file/${encodeURIComponent(resource.filename)}`
+      : resource.url
+    return getMediaUrl(mediaPath, resource.updatedAt)
   }
   return undefined
 }
 
 const buildLogoNudeSrc = (resource: HomeHeroBlockProps['logoNude']) => {
   if (resource && typeof resource === 'object') {
-    return getMediaUrl(resource.url, resource.updatedAt)
+    const mediaPath = resource.filename
+      ? `/api/media/file/${encodeURIComponent(resource.filename)}`
+      : resource.url
+    return getMediaUrl(mediaPath, resource.updatedAt)
   }
   return undefined
 }
