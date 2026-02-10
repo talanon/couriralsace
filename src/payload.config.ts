@@ -121,8 +121,16 @@ const folderCollectionOverrides: FolderCollectionOverride[] = [
 const mailerDsn = process.env.MAILER_DSN
 const defaultFromAddress = process.env.MAILER_FROM ?? 'no-reply@couriralsace.local'
 const defaultFromName = process.env.MAILER_FROM_NAME ?? 'Courir Alsace'
+const mailerIsMasked = (value?: string | null) => {
+  if (!value) {
+    return true
+  }
+  const trimmed = value.trim()
+  return !trimmed || trimmed === '****' || trimmed.includes('****')
+}
+
 const mailerTransport =
-  mailerDsn && mailerDsn.length
+  mailerDsn && mailerDsn.length && !mailerIsMasked(mailerDsn)
     ? nodemailer.createTransport(mailerDsn, {
         tls: {
           rejectUnauthorized: process.env.MAILER_TLS_REJECT !== '0',
