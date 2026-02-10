@@ -1,0 +1,3 @@
+[build]
+  command = "pnpm run payload db:migrate && pnpm run build"
+  publish = ".next"
