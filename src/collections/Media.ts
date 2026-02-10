@@ -6,14 +6,19 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
-import { fileURLToPath } from 'url'
 
 import { assignTenantFromUser } from '../hooks/assignTenant'
 import { requireTenantField } from '../hooks/requireTenant'
 import { getTenantIdFromRequest, restrictToUserTenants, requireTenantRole } from '../access/tenants'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const getUploadStaticDir = () => {
+  // Netlify/AWS Lambda file systems are ephemeral and only /tmp is writable.
+  if (process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return '/tmp/payload-media'
+  }
+
+  return path.resolve(process.cwd(), 'public/media')
+}
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -71,7 +76,7 @@ export const Media: CollectionConfig = {
   },
   upload: {
     // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
-    staticDir: path.resolve(dirname, '../../public/media'),
+    staticDir: getUploadStaticDir(),
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes: [

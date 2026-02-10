@@ -3,6 +3,7 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { Plugin } from 'payload'
 import type { Field } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
@@ -38,6 +39,35 @@ const tenantFormField: Field = {
     hidden: true,
   },
 }
+
+const s3StorageEnabled = Boolean(
+  process.env.S3_BUCKET &&
+    process.env.S3_REGION &&
+    process.env.S3_ACCESS_KEY &&
+    process.env.S3_SECRET_KEY,
+)
+
+const storagePlugins: Plugin[] = s3StorageEnabled
+  ? [
+      s3Storage({
+        collections: {
+          media: true,
+        },
+        bucket: process.env.S3_BUCKET!,
+        config: {
+          region: process.env.S3_REGION!,
+          credentials: {
+            accessKeyId: process.env.S3_ACCESS_KEY!,
+            secretAccessKey: process.env.S3_SECRET_KEY!,
+          },
+          ...(process.env.S3_ENDPOINT ? { endpoint: process.env.S3_ENDPOINT } : {}),
+          ...(process.env.S3_FORCE_PATH_STYLE
+            ? { forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true' }
+            : {}),
+        },
+      }),
+    ]
+  : []
 
 export const plugins: Plugin[] = [
   redirectsPlugin({
@@ -156,4 +186,5 @@ export const plugins: Plugin[] = [
       },
     },
   }),
+  ...storagePlugins,
 ]
