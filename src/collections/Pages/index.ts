@@ -5,6 +5,7 @@ import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
+import { HomeHero } from '../../blocks/HomeHero/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
@@ -77,6 +78,23 @@ export const Pages: CollectionConfig<'pages'> = {
       label: 'Titre',
     },
     {
+      name: 'template',
+      type: 'select',
+      label: 'Template',
+      required: true,
+      options: [
+        {
+          label: 'Standard',
+          value: 'default',
+        },
+        {
+          label: 'Hero (no chrome)',
+          value: 'hero',
+        },
+      ],
+      defaultValue: 'default',
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -88,7 +106,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [HomeHero, CallToAction, Content, MediaBlock, Archive, FormBlock],
               required: true,
               admin: {
                 initCollapsed: true,

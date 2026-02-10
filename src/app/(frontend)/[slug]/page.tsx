@@ -78,11 +78,11 @@ export default async function Page({ params: paramsPromise }: Args) {
     return <PayloadRedirects url={url} />
   }
 
-  const { hero, layout } = page
+  const { hero, layout, template = 'default' } = page
 
   return (
-    <article className="pt-16 pb-24">
-      <PageClient />
+    <article className="pb-24">
+      <PageClient template={template} />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 

@@ -4,6 +4,7 @@ import type { RequiredDataFromCollectionSlug } from 'payload'
 export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
   slug: 'home',
   _status: 'published',
+  template: 'hero',
   hero: {
     type: 'lowImpact',
     richText: {
@@ -19,7 +20,7 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Payload Website Template',
+                text: 'Courir Alsace',
                 version: 1,
               },
             ],
@@ -27,48 +28,6 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
             format: '',
             indent: 0,
             tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'paragraph',
-            children: [
-              {
-                type: 'link',
-                children: [
-                  {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Visit the admin dashboard',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                fields: {
-                  linkType: 'custom',
-                  newTab: false,
-                  url: '/admin',
-                },
-                format: '',
-                indent: 0,
-                version: 2,
-              },
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: ' to make your account and seed content for your website.',
-                version: 1,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            textFormat: 0,
             version: 1,
           },
         ],
@@ -79,10 +38,25 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
       },
     },
   },
+  layout: [
+    {
+      blockType: 'homeHero',
+      headline: 'Toutes les sorties trail & course à pied',
+      highlightText: 'officielles... ou pas !',
+      footerSymbol: '∿',
+      buttonLabel: 'Rester informé(e) !',
+      inputPlaceholder: 'Votre adresse mail...',
+      tagline: 'Le fil des sorties, officielles ou improvisées.',
+      logoPrimary: 'sortie',
+      logoSecondary: 'longue',
+      logoBadge: 'en Alsace',
+      backgroundUrl:
+        'https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=1600&q=80',
+    },
+  ],
   meta: {
-    description: 'An open-source website built with Payload and Next.js.',
-    title: 'Payload Website Template',
+    description: 'Toutes les sorties trail & course à pied en Alsace.',
+    title: 'Sortie Longue en Alsace',
   },
-  title: 'Home',
-  layout: [],
+  title: 'Page d’accueil',
 }

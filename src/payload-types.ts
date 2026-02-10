@@ -159,6 +159,7 @@ export interface UserAuthOperations {
 export interface Page {
   id: number;
   title: string;
+  template: 'default' | 'hero';
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
     richText?: {
@@ -202,7 +203,7 @@ export interface Page {
       | null;
     media?: (number | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (HomeHeroBlock | CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
   meta?: {
     title?: string | null;
     /**
@@ -507,6 +508,33 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HomeHeroBlock".
+ */
+export interface HomeHeroBlock {
+  /**
+   * Image utilisée pour la marque (remplace les mots).
+   */
+  logo?: (number | null) | Media;
+  headline: string;
+  highlightText?: string | null;
+  tagline?: string | null;
+  /**
+   * Used when no media upload is provided.
+   */
+  backgroundUrl?: string | null;
+  background?: (number | null) | Media;
+  inputPlaceholder?: string | null;
+  buttonLabel?: string | null;
+  /**
+   * Image minimaliste placée en bas du hero.
+   */
+  logoNude?: (number | null) | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'homeHero';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1180,6 +1208,7 @@ export interface PayloadMigration {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  template?: T;
   hero?:
     | T
     | {
@@ -1205,6 +1234,7 @@ export interface PagesSelect<T extends boolean = true> {
   layout?:
     | T
     | {
+        homeHero?: T | HomeHeroBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
@@ -1225,6 +1255,23 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HomeHeroBlock_select".
+ */
+export interface HomeHeroBlockSelect<T extends boolean = true> {
+  logo?: T;
+  headline?: T;
+  highlightText?: T;
+  tagline?: T;
+  backgroundUrl?: T;
+  background?: T;
+  inputPlaceholder?: T;
+  buttonLabel?: T;
+  logoNude?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

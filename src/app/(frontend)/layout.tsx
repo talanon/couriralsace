@@ -4,6 +4,7 @@ import { draftMode, headers } from 'next/headers'
 import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
+import { Akshar } from 'next/font/google'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
@@ -17,6 +18,12 @@ import { resolveTenant } from '@/utilities/resolveTenant'
 import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
 
+const akshar = Akshar({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-akshar',
+})
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
   const requestHeaders = await headers()
@@ -29,7 +36,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const mediaOrigin = `${protocol}://${host}`
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
+    <html
+      className={cn(GeistSans.variable, GeistMono.variable, akshar.variable)}
+      lang="en"
+      suppressHydrationWarning
+    >
       <head>
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
