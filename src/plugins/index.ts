@@ -20,7 +20,7 @@ import { restrictToUserTenants, requireTenantRole } from '@/access/tenants'
 import { superAdminOnly } from '@/access'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
+  return doc?.title ? `${doc.title}` : 'Template en cours de construction'
 }
 
 const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
