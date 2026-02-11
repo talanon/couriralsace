@@ -74,6 +74,7 @@ export interface Config {
     users: User;
     tenants: Tenant;
     events: Event;
+    'newsletter-subscribers': NewsletterSubscriber;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -98,6 +99,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
+    'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -923,6 +925,24 @@ export interface Event {
   createdAt: string;
 }
 /**
+ * Export CSV: utilisez l’URL /api/newsletter-subscribers/export (nécessite une session admin).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-subscribers".
+ */
+export interface NewsletterSubscriber {
+  id: number;
+  email: string;
+  emailKey: string;
+  status: 'subscribed' | 'unsubscribed';
+  source?: string | null;
+  sourcePath?: string | null;
+  subscribedAt: string;
+  tenant?: (number | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
@@ -1139,6 +1159,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'events';
         value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'newsletter-subscribers';
+        value: number | NewsletterSubscriber;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1616,6 +1640,21 @@ export interface EventsSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-subscribers_select".
+ */
+export interface NewsletterSubscribersSelect<T extends boolean = true> {
+  email?: T;
+  emailKey?: T;
+  status?: T;
+  source?: T;
+  sourcePath?: T;
+  subscribedAt?: T;
+  tenant?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -4,8 +4,8 @@ export const HomeHero: Block = {
   slug: 'homeHero',
   interfaceName: 'HomeHeroBlock',
   labels: {
-    singular: 'Home hero',
-    plural: 'Home heroes',
+    singular: 'Newsletter',
+    plural: 'Newsletters',
   },
   fields: [
     {

@@ -5,6 +5,7 @@ import configPromise from '@payload-config'
 import type { HomeHeroBlock as HomeHeroBlockProps } from '@/payload-types'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import type { Media } from '@/payload-types'
+import { NewsletterSignupForm } from './NewsletterSignupForm.client'
 
 const resolveMediaDoc = async (
   resource: HomeHeroBlockProps['background'] | HomeHeroBlockProps['logo'] | HomeHeroBlockProps['logoNude'],
@@ -88,7 +89,7 @@ export const HomeHeroBlock = async ({
   }
 
   if (heroImage) {
-    heroStyle.backgroundImage = `linear-gradient(180deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.81) 60%, rgba(0, 0, 0, 0.93) 100%), url('${heroImage}')`
+    heroStyle.backgroundImage = `url('${heroImage}')`
   }
 
   const heroHeadline = headline || 'Toutes les sorties trail & course à pied'
@@ -105,7 +106,7 @@ export const HomeHeroBlock = async ({
         </figure>
       )}
 
-      <div className="w-full max-w-[1200px] shadow-[0_20px_45px_rgba(0,0,0,0.25)]">
+      <div className="w-full max-w-[1200px]">
         <div className="relative overflow-hidden" style={heroStyle}>
           <div className="flex min-h-[460px] w-full flex-col items-center justify-center gap-6 px-6 text-center text-white">
             <p
@@ -128,37 +129,7 @@ export const HomeHeroBlock = async ({
               </span>
             </div>
             <div className="w-full max-w-3xl px-4">
-              <div className="flex flex-col gap-3 rounded-full border border-white/60 bg-white/90 px-3 py-2 shadow-lg sm:flex-row sm:items-center items-center">
-                <input
-                  aria-label="Adresse mail"
-                  className="flex-1 rounded-full border-none bg-transparent px-3 text-base font-medium text-slate-900 outline-none placeholder:text-slate-500"
-                  style={{
-                    height: '47px',
-                    lineHeight: '50px',
-                  }}
-                  placeholder={placeholder}
-                  type="email"
-                  autoComplete="email"
-                />
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#B0FF34] px-6 py-3 text-xs font-semibold uppercase tracking-[0.4em] text-black transition hover:bg-[#9bf22d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B0FF34] self-center sm:self-auto"
-                  style={{
-                    height: '47px',
-                    minHeight: '47px',
-                    width: '174px',
-                    fontFamily: 'var(--font-akshar), var(--font-geist-sans), system-ui, sans-serif',
-                    fontWeight: 500,
-                    fontSize: '18px',
-                    lineHeight: '70px',
-                    letterSpacing: '0em',
-                    textAlign: 'center',
-                    verticalAlign: 'middle',
-                  }}
-                >
-                  {buttonText}
-                </button>
-              </div>
+              <NewsletterSignupForm buttonText={buttonText} placeholder={placeholder} />
             </div>
           </div>
         </div>

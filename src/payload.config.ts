@@ -22,6 +22,7 @@ type MailerConfig = {
 import { Categories } from './collections/Categories'
 import { Events } from './collections/Events'
 import { Media } from './collections/Media'
+import { NewsletterSubscribers } from './collections/NewsletterSubscribers'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Tenants } from './collections/Tenants'
@@ -218,7 +219,7 @@ export default buildConfig({
       connectionString: process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL || '',
     },
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Tenants, Events],
+  collections: [Pages, Posts, Media, Categories, Users, Tenants, Events, NewsletterSubscribers],
   folders: {
     collectionOverrides: folderCollectionOverrides,
   },
