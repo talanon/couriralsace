@@ -53,10 +53,10 @@ export const NewsletterSignupForm = ({ placeholder, buttonText }: Props) => {
 
   return (
     <form className="flex w-full flex-col gap-2" onSubmit={onSubmit}>
-      <div className="flex flex-col gap-3 rounded-full border border-white/60 bg-white/90 px-3 py-2 shadow-lg sm:flex-row sm:items-center items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center items-center">
         <input
           aria-label="Adresse mail"
-          className="flex-1 rounded-full border-none bg-transparent px-3 text-base font-medium text-slate-900 outline-none placeholder:text-slate-500"
+          className="flex-1 rounded-full border border-white/60 bg-white/90 px-6 py-2 shadow-lg text-base font-medium text-slate-900 outline-none placeholder:text-slate-500"
           style={{
             height: '47px',
             lineHeight: '50px',
@@ -71,7 +71,7 @@ export const NewsletterSignupForm = ({ placeholder, buttonText }: Props) => {
         <button
           type="submit"
           disabled={state === 'loading'}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#B0FF34] px-6 py-3 text-xs font-semibold uppercase tracking-[0.4em] text-black transition hover:bg-[#9bf22d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B0FF34] self-center sm:self-auto disabled:opacity-70 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#B0FF34] px-6 py-3 text-xs font-semibold uppercase tracking-[0.4em] text-black transition hover:bg-[#9bf22d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B0FF34] self-center sm:self-auto sm:-ml-16 sm:relative sm:z-10 disabled:opacity-70 disabled:cursor-not-allowed"
           style={{
             height: '47px',
             minHeight: '47px',
