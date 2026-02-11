@@ -14,7 +14,7 @@ export async function Footer() {
 
   return (
     <footer
-      className="mt-auto border-t border-border bg-black dark:bg-card text-white"
+      className="mt-auto border-t border-border bg-[#f2f2f2] text-black"
       data-page-template-hidden
     >
       <div className="container py-8 gap-8 flex flex-col md:flex-row md:justify-between">
@@ -25,7 +25,7 @@ export async function Footer() {
         <div className="flex flex-col-reverse items-start md:flex-row gap-4 md:items-center">
           <nav className="flex flex-col md:flex-row gap-4">
             {navItems.map(({ link }, i) => {
-              return <CMSLink className="text-white" key={i} {...link} />
+              return <CMSLink className="text-black" key={i} {...link} />
             })}
           </nav>
         </div>

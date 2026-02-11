@@ -2,11 +2,18 @@ import type { CollectionConfig } from 'payload'
 
 import { isSuperAdmin, restrictToUserTenants, requireTenantRole } from '../../access/tenants'
 import { Archive } from '../../blocks/ArchiveBlock/config'
+import { EventGrid } from '../../blocks/EventGrid/config'
+import { FeatureSection } from '../../blocks/FeatureSection/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { HomeHero } from '../../blocks/HomeHero/config'
+import { ImageText } from '../../blocks/ImageText/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { AlsaceEventsMap } from '../../blocks/AlsaceEventsMap/config'
+import { SectionEntete } from '../../blocks/SectionEntete/config'
+import { Stats } from '../../blocks/Stats/config'
+import { Timeline } from '../../blocks/Timeline/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -106,7 +113,21 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [HomeHero, CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [
+                HomeHero,
+                SectionEntete,
+                Stats,
+                FeatureSection,
+                EventGrid,
+                ImageText,
+                Timeline,
+                CallToAction,
+                Content,
+                MediaBlock,
+                Archive,
+                FormBlock,
+                AlsaceEventsMap,
+              ],
               required: true,
               admin: {
                 initCollapsed: true,

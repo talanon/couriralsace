@@ -31,13 +31,13 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ navItems }) => {
 
   return (
     <header
-      className="container relative z-20"
+      className="relative z-20 bg-[#f2f2f2]"
       {...(theme ? { 'data-theme': theme } : {})}
       data-page-template-hidden
     >
-      <div className="py-8 flex justify-between">
+      <div className="container pb-3 pt-4 flex justify-between">
         <Link href="/">
-          <Logo loading="eager" priority="high" className="invert dark:invert-0" />
+          <Logo loading="eager" priority="high" className="h-[52px] w-auto max-w-none md:h-[64px] lg:h-[80px]" />
         </Link>
         <HeaderNav navItems={navItems} />
       </div>

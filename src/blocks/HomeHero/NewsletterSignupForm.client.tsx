@@ -71,7 +71,7 @@ export const NewsletterSignupForm = ({ placeholder, buttonText }: Props) => {
         <button
           type="submit"
           disabled={state === 'loading'}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#B0FF34] px-6 py-3 text-xs font-semibold uppercase tracking-[0.4em] text-black transition hover:bg-[#9bf22d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B0FF34] self-center sm:self-auto sm:-ml-16 sm:relative sm:z-10 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[var(--brand-green)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.4em] text-black transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-green)] self-center sm:self-auto sm:-ml-16 sm:relative sm:z-10 disabled:opacity-70 disabled:cursor-not-allowed"
           style={{
             height: '47px',
             minHeight: '47px',

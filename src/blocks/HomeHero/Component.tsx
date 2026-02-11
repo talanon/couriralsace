@@ -59,12 +59,38 @@ const buildLogoNudeSrc = (resource: Media | null) => {
   return undefined
 }
 
+const renderStyledText = (value: string) => {
+  const source = value.replace(/<br\s*\/?>/gi, '\n')
+  const lines = source.split('\n')
+
+  return lines.map((line, lineIndex) => {
+    const parts = line.split(/(<green>[\s\S]*?<\/green>)/gi).filter(Boolean)
+
+    return (
+      <React.Fragment key={`headline-line-${lineIndex}`}>
+        {parts.map((part, partIndex) => {
+          const match = part.match(/^<green>([\s\S]*?)<\/green>$/i)
+          if (match) {
+            return (
+              <span className="text-[var(--brand-green)]" key={`headline-part-${lineIndex}-${partIndex}`}>
+                {match[1]}
+              </span>
+            )
+          }
+
+          return <span key={`headline-part-${lineIndex}-${partIndex}`}>{part}</span>
+        })}
+        {lineIndex < lines.length - 1 && <br />}
+      </React.Fragment>
+    )
+  })
+}
+
 export const HomeHeroBlock = async ({
   background,
   backgroundUrl,
   buttonLabel,
-  highlightText,
-  headline,
+  headlineStyled,
   inputPlaceholder,
   logo,
   logoNude,
@@ -92,8 +118,8 @@ export const HomeHeroBlock = async ({
     heroStyle.backgroundImage = `url('${heroImage}')`
   }
 
-  const heroHeadline = headline || 'Toutes les sorties trail & course à pied'
-  const heroHighlight = highlightText || 'officielles... ou pas !'
+  const heroHeadline =
+    headlineStyled || 'Toutes les sorties\n<green>trail & course à pied</green>\nen Alsace'
   const heroTagline = tagline || 'Le fil des sorties, officielles ou improvisées.'
   const placeholder = inputPlaceholder || 'Votre adresse mail...'
   const buttonText = buttonLabel || 'Rester informé(e) !'
@@ -107,27 +133,26 @@ export const HomeHeroBlock = async ({
       )}
 
       <div className="w-full max-w-[1200px]">
-        <div className="relative overflow-hidden" style={heroStyle}>
+        <div className="relative overflow-hidden rounded-[50px]" style={heroStyle}>
           <div className="flex min-h-[460px] w-full flex-col items-center justify-center gap-6 px-6 text-center text-white">
+            <div className="max-w-3xl text-[40px] leading-[50px] font-[500] tracking-[0em] text-white md:text-[40px] lg:text-[40px]">
+              {renderStyledText(heroHeadline)}
+            </div>
             <p
-              className="max-w-xl uppercase text-white/80 text-center"
+              className="max-w-2xl text-center text-white/85"
               style={{
-                fontFamily: 'var(--font-akshar), var(--font-geist-sans), system-ui, sans-serif',
+                fontFamily: 'var(--font-open-sans), var(--font-geist-sans), system-ui, sans-serif',
                 fontWeight: 300,
-                fontSize: '20px',
-                lineHeight: '50px',
-                letterSpacing: '0em',
+                fontStyle: 'normal',
+                fontSize: '14px',
+                lineHeight: '24px',
+                letterSpacing: '0%',
+                textAlign: 'center',
+                verticalAlign: 'middle',
               }}
             >
-              {heroTagline}
+              {renderStyledText(heroTagline)}
             </p>
-            <div className="max-w-3xl text-[40px] leading-[50px] font-[500] tracking-[0em] text-white md:text-[40px] lg:text-[40px]">
-              {heroHeadline}
-              <br />
-              <span className="text-[#B0FF34] block tracking-[0em] text-[40px] leading-[50px] font-[500]">
-                {heroHighlight}
-              </span>
-            </div>
             <div className="w-full max-w-3xl px-4">
               <NewsletterSignupForm buttonText={buttonText} placeholder={placeholder} />
             </div>

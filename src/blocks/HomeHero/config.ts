@@ -19,23 +19,26 @@ export const HomeHero: Block = {
       },
     },
     {
-      name: 'headline',
-      type: 'text',
-      label: 'Hero headline',
+      name: 'headlineStyled',
+      type: 'textarea',
+      label: 'Headline (texte mixte)',
       required: true,
-      defaultValue: 'Toutes les sorties trail & course à pied',
-    },
-    {
-      name: 'highlightText',
-      type: 'text',
-      label: 'Highlighted companion text',
-      defaultValue: 'officielles... ou pas !',
+      defaultValue:
+        'Toutes les sorties\n<green>trail & course à pied</green>\nen Alsace',
+      admin: {
+        description:
+          'Utilisez <green>...</green> pour la partie verte et des retours a la ligne pour la mise en forme.',
+      },
     },
     {
       name: 'tagline',
-      type: 'text',
+      type: 'textarea',
       label: 'Supporting tagline',
       defaultValue: 'Le fil des sorties, officielles ou improvisées.',
+      admin: {
+        description:
+          'Utilisez <green>...</green> pour la partie verte et des retours a la ligne pour la mise en forme.',
+      },
     },
     {
       name: 'backgroundUrl',

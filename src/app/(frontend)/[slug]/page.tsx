@@ -12,6 +12,8 @@ import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import { normalizeTenantId } from '@/access/tenants'
 import { resolveTenant } from '@/utilities/resolveTenant'
+import { DecorativeCurves } from '@/components/DecorativeCurves'
+import { cn } from '@/utilities/ui'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 
@@ -79,17 +81,54 @@ export default async function Page({ params: paramsPromise }: Args) {
   }
 
   const { hero, layout, template = 'default' } = page
+  const useStandardChrome = template === 'default'
+  const headerBlocks = useStandardChrome
+    ? layout.filter((block) => block.blockType === 'sectionEntete')
+    : []
+  const remainingBlocks = useStandardChrome
+    ? layout.filter((block) => block.blockType !== 'sectionEntete')
+    : layout
 
   return (
-    <article className="pb-24">
+    <article className={cn('pb-24', useStandardChrome && 'relative isolate overflow-hidden bg-[#f2f2f2]')}>
       <PageClient template={template} />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 
       {draft && <LivePreviewListener />}
 
-      <RenderHero {...hero} />
-      <RenderBlocks blocks={layout} />
+      {useStandardChrome && (
+        <div className="pointer-events-none absolute inset-0 z-20 mix-blend-multiply">
+          <DecorativeCurves opacity="opacity-80" position="right" variant="light" className="!-translate-y-0 !top-[250px]" />
+          <DecorativeCurves
+            opacity="opacity-80"
+            position="left"
+            variant="light"
+            className="!-translate-y-0 !top-[920px] md:!top-[980px]"
+          />
+        </div>
+      )}
+
+      <div className={cn(useStandardChrome && 'relative')}>
+        <RenderHero {...hero} />
+        {headerBlocks.length > 0 && <RenderBlocks blocks={headerBlocks} />}
+      </div>
+
+      {useStandardChrome && (
+        <div className="pointer-events-none absolute inset-0 z-50 mix-blend-color">
+          <DecorativeCurves opacity="opacity-80" position="right" variant="light" className="!-translate-y-0 !top-[250px]" />
+          <DecorativeCurves
+            opacity="opacity-80"
+            position="left"
+            variant="light"
+            className="!-translate-y-0 !top-[920px] md:!top-[980px]"
+          />
+        </div>
+      )}
+
+      <div className={cn(useStandardChrome && 'relative')}>
+        <RenderBlocks blocks={remainingBlocks} />
+      </div>
     </article>
   )
 }

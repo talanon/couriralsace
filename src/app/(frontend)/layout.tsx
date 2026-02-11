@@ -4,7 +4,7 @@ import { draftMode, headers } from 'next/headers'
 import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
-import { Akshar } from 'next/font/google'
+import { Akshar, Open_Sans } from 'next/font/google'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
@@ -24,6 +24,12 @@ const akshar = Akshar({
   variable: '--font-akshar',
 })
 
+const openSans = Open_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '600', '700'],
+  variable: '--font-open-sans',
+})
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
   const requestHeaders = await headers()
@@ -37,7 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html
-      className={cn(GeistSans.variable, GeistMono.variable, akshar.variable)}
+      className={cn(GeistSans.variable, GeistMono.variable, akshar.variable, openSans.variable)}
       lang="en"
       suppressHydrationWarning
     >

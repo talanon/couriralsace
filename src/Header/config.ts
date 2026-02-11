@@ -19,6 +19,31 @@ export const Header: GlobalConfig = {
         link({
           appearances: false,
         }),
+        {
+          name: 'icon',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Icone',
+          admin: {
+            description: 'Icone optionnelle affichee a gauche du libelle.',
+          },
+        },
+        {
+          name: 'style',
+          type: 'select',
+          label: 'Style',
+          defaultValue: 'link',
+          options: [
+            {
+              label: 'Lien',
+              value: 'link',
+            },
+            {
+              label: 'Bouton vert arrondi',
+              value: 'green-pill',
+            },
+          ],
+        },
       ],
       maxRows: 6,
       admin: {

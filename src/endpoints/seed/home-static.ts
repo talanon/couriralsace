@@ -41,8 +41,8 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
   layout: [
     {
       blockType: 'homeHero',
-      headline: 'Toutes les sorties trail & course à pied',
-      highlightText: 'officielles... ou pas !',
+      headlineStyled:
+        'Toutes les sorties\n<green>trail & course à pied</green>\nen Alsace',
       buttonLabel: 'Rester informé(e) !',
       inputPlaceholder: 'Votre adresse mail...',
       tagline: 'Le fil des sorties, officielles ou improvisées.',

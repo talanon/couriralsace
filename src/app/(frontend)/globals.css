@@ -17,8 +17,36 @@
   h4,
   h5,
   h6 {
-    font-weight: unset;
-    font-size: unset;
+    font-family: var(--font-akshar), var(--font-geist-sans), system-ui, sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 40px;
+    leading-trim: none;
+    line-height: 45px;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  p {
+    font-family: var(--font-open-sans), var(--font-geist-sans), system-ui, sans-serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 14px;
+    leading-trim: none;
+    line-height: 24px;
+    letter-spacing: 0;
+  }
+
+  button,
+  [data-slot='button'] {
+    font-family: var(--font-akshar), var(--font-geist-sans), system-ui, sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 20px;
+    leading-trim: none;
+    line-height: 70px;
+    letter-spacing: 0;
+    vertical-align: middle;
   }
 }
 
@@ -87,6 +115,7 @@
 }
 
 :root {
+  --brand-green: #9de828;
   --background: oklch(100% 0 0deg);
   --foreground: oklch(14.5% 0 0deg);
   --card: oklch(96.5% 0.005 265deg);
@@ -126,6 +155,7 @@
 }
 
 [data-theme='dark'] {
+  --brand-green: #9de828;
   --background: oklch(14.5% 0 0deg);
   --foreground: oklch(98.5% 0 0deg);
   --card: oklch(17% 0 0deg);
@@ -231,4 +261,20 @@ body[data-page-template='hero'] footer[data-page-template-hidden] {
 
 body[data-page-template='hero'] main {
   padding-top: 0;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.curve-top {
+  position: relative;
+  z-index: 60;
 }

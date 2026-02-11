@@ -205,7 +205,21 @@ export interface Page {
       | null;
     media?: (number | null) | Media;
   };
-  layout: (HomeHeroBlock | CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (
+    | HomeHeroBlock
+    | SectionEnteteBlock
+    | StatsBlock
+    | FeatureSectionBlock
+    | EventGridBlock
+    | ImageTextBlock
+    | TimelineBlock
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+    | AlsaceEventsMapBlock
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -520,8 +534,13 @@ export interface HomeHeroBlock {
    * Image utilisée pour la marque (remplace les mots).
    */
   logo?: (number | null) | Media;
-  headline: string;
-  highlightText?: string | null;
+  /**
+   * Utilisez <green>...</green> pour la partie verte et des retours a la ligne pour la mise en forme.
+   */
+  headlineStyled: string;
+  /**
+   * Utilisez <green>...</green> pour la partie verte et des retours a la ligne pour la mise en forme.
+   */
   tagline?: string | null;
   /**
    * Used when no media upload is provided.
@@ -537,6 +556,184 @@ export interface HomeHeroBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'homeHero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SectionEnteteBlock".
+ */
+export interface SectionEnteteBlock {
+  ctaLabel?: string | null;
+  ctaUrl?: string | null;
+  title: string;
+  highlightedText: string;
+  location: string;
+  backgroundImage: number | Media;
+  showDecorativeCurves?: boolean | null;
+  /**
+   * Exemples: opacity-20, opacity-40, opacity-60, opacity-80, opacity-100
+   */
+  curveOpacity?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'sectionEntete';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock".
+ */
+export interface StatsBlock {
+  items?:
+    | {
+        number: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'stats';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureSectionBlock".
+ */
+export interface FeatureSectionBlock {
+  title: string;
+  subtitle?: string | null;
+  highlightedText?: string | null;
+  description?: string | null;
+  ctaText?: string | null;
+  ctaLink?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureSection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "EventGridBlock".
+ */
+export interface EventGridBlock {
+  title: string;
+  ctaText?: string | null;
+  ctaLink?: string | null;
+  events?: (number | Event)[] | null;
+  /**
+   * Utilise cette liste si la relation events n est pas disponible pour le front.
+   */
+  manualEvents?:
+    | {
+        title: string;
+        dateLabel: string;
+        distanceLabel?: string | null;
+        elevationLabel?: string | null;
+        locationLabel?: string | null;
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'eventGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  tenant?: (number | null) | Tenant;
+  startDate: string;
+  endDate: string;
+  location?: string | null;
+  image?: (number | null) | Media;
+  courses?:
+    | {
+        title: string;
+        date: string;
+        type: 'trail' | 'course';
+        official?: boolean | null;
+        level: 'beginner' | 'intermediate' | 'expert';
+        distance?: number | null;
+        elevationGain?: number | null;
+        location?: string | null;
+        /**
+         * Laisser vide si meme valeur que l'evenement
+         */
+        image?: (number | null) | Media;
+        /**
+         * Laisser vide si meme valeur que l'evenement
+         */
+        gpx?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  description?: string | null;
+  registrationLink?: string | null;
+  partners?:
+    | {
+        name?: string | null;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question?: string | null;
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageTextBlock".
+ */
+export interface ImageTextBlock {
+  layout?: ('imageLeft' | 'imageRight') | null;
+  image: number | Media;
+  title: string;
+  subtitle?: string | null;
+  highlightedText?: string | null;
+  description?: string | null;
+  ctas?:
+    | {
+        text: string;
+        link?: string | null;
+        icon?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  showDecorativeCurves?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'imageText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TimelineBlock".
+ */
+export interface TimelineBlock {
+  title: string;
+  highlightedText?: string | null;
+  steps?:
+    | {
+        isActive?: boolean | null;
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'timeline';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -883,46 +1080,16 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events".
+ * via the `definition` "AlsaceEventsMapBlock".
  */
-export interface Event {
-  id: number;
+export interface AlsaceEventsMapBlock {
   title: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  tenant: number | Tenant;
-  date: string;
-  location?: string | null;
-  /**
-   * Distance totale en km
-   */
-  distance?: number | null;
-  /**
-   * D+ en mètres
-   */
-  elevationGain?: number | null;
-  gpx?: (number | null) | Media;
-  description?: string | null;
-  registrationLink?: string | null;
-  partners?:
-    | {
-        name?: string | null;
-        url?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  faq?:
-    | {
-        question?: string | null;
-        answer?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
+  subtitle?: string | null;
+  monthsAhead: number;
+  maxEvents: number;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'alsaceEventsMap';
 }
 /**
  * Export CSV: utilisez l’URL /api/newsletter-subscribers/export (nécessite une session admin).
@@ -1259,11 +1426,18 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         homeHero?: T | HomeHeroBlockSelect<T>;
+        sectionEntete?: T | SectionEnteteBlockSelect<T>;
+        stats?: T | StatsBlockSelect<T>;
+        featureSection?: T | FeatureSectionBlockSelect<T>;
+        eventGrid?: T | EventGridBlockSelect<T>;
+        imageText?: T | ImageTextBlockSelect<T>;
+        timeline?: T | TimelineBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        alsaceEventsMap?: T | AlsaceEventsMapBlockSelect<T>;
       };
   meta?:
     | T
@@ -1286,14 +1460,122 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface HomeHeroBlockSelect<T extends boolean = true> {
   logo?: T;
-  headline?: T;
-  highlightText?: T;
+  headlineStyled?: T;
   tagline?: T;
   backgroundUrl?: T;
   background?: T;
   inputPlaceholder?: T;
   buttonLabel?: T;
   logoNude?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SectionEnteteBlock_select".
+ */
+export interface SectionEnteteBlockSelect<T extends boolean = true> {
+  ctaLabel?: T;
+  ctaUrl?: T;
+  title?: T;
+  highlightedText?: T;
+  location?: T;
+  backgroundImage?: T;
+  showDecorativeCurves?: T;
+  curveOpacity?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock_select".
+ */
+export interface StatsBlockSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        number?: T;
+        label?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureSectionBlock_select".
+ */
+export interface FeatureSectionBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  highlightedText?: T;
+  description?: T;
+  ctaText?: T;
+  ctaLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "EventGridBlock_select".
+ */
+export interface EventGridBlockSelect<T extends boolean = true> {
+  title?: T;
+  ctaText?: T;
+  ctaLink?: T;
+  events?: T;
+  manualEvents?:
+    | T
+    | {
+        title?: T;
+        dateLabel?: T;
+        distanceLabel?: T;
+        elevationLabel?: T;
+        locationLabel?: T;
+        image?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageTextBlock_select".
+ */
+export interface ImageTextBlockSelect<T extends boolean = true> {
+  layout?: T;
+  image?: T;
+  title?: T;
+  subtitle?: T;
+  highlightedText?: T;
+  description?: T;
+  ctas?:
+    | T
+    | {
+        text?: T;
+        link?: T;
+        icon?: T;
+        id?: T;
+      };
+  showDecorativeCurves?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TimelineBlock_select".
+ */
+export interface TimelineBlockSelect<T extends boolean = true> {
+  title?: T;
+  highlightedText?: T;
+  steps?:
+    | T
+    | {
+        isActive?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1378,6 +1660,18 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AlsaceEventsMapBlock_select".
+ */
+export interface AlsaceEventsMapBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  monthsAhead?: T;
+  maxEvents?: T;
   id?: T;
   blockName?: T;
 }
@@ -1619,11 +1913,25 @@ export interface EventsSelect<T extends boolean = true> {
   generateSlug?: T;
   slug?: T;
   tenant?: T;
-  date?: T;
+  startDate?: T;
+  endDate?: T;
   location?: T;
-  distance?: T;
-  elevationGain?: T;
-  gpx?: T;
+  image?: T;
+  courses?:
+    | T
+    | {
+        title?: T;
+        date?: T;
+        type?: T;
+        official?: T;
+        level?: T;
+        distance?: T;
+        elevationGain?: T;
+        location?: T;
+        image?: T;
+        gpx?: T;
+        id?: T;
+      };
   description?: T;
   registrationLink?: T;
   partners?:
@@ -1958,6 +2266,11 @@ export interface Header {
           url?: string | null;
           label: string;
         };
+        /**
+         * Icone optionnelle affichee a gauche du libelle.
+         */
+        icon?: (number | null) | Media;
+        style?: ('link' | 'green-pill') | null;
         id?: string | null;
       }[]
     | null;
@@ -2010,6 +2323,8 @@ export interface HeaderSelect<T extends boolean = true> {
               url?: T;
               label?: T;
             };
+        icon?: T;
+        style?: T;
         id?: T;
       };
   updatedAt?: T;
