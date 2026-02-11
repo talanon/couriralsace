@@ -47,27 +47,26 @@ const s3StorageEnabled = Boolean(
     process.env.S3_SECRET_KEY,
 )
 
-const storagePlugins: Plugin[] = s3StorageEnabled
-  ? [
-      s3Storage({
-        collections: {
-          media: true,
-        },
-        bucket: process.env.S3_BUCKET!,
-        config: {
-          region: process.env.S3_REGION!,
-          credentials: {
-            accessKeyId: process.env.S3_ACCESS_KEY!,
-            secretAccessKey: process.env.S3_SECRET_KEY!,
-          },
-          ...(process.env.S3_ENDPOINT ? { endpoint: process.env.S3_ENDPOINT } : {}),
-          ...(process.env.S3_FORCE_PATH_STYLE
-            ? { forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true' }
-            : {}),
-        },
-      }),
-    ]
-  : []
+const storagePlugins: Plugin[] = [
+  s3Storage({
+    enabled: s3StorageEnabled,
+    collections: {
+      media: true,
+    },
+    bucket: process.env.S3_BUCKET || 'placeholder-bucket',
+    config: {
+      region: process.env.S3_REGION || 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY || 'placeholder-access-key',
+        secretAccessKey: process.env.S3_SECRET_KEY || 'placeholder-secret-key',
+      },
+      ...(process.env.S3_ENDPOINT ? { endpoint: process.env.S3_ENDPOINT } : {}),
+      ...(process.env.S3_FORCE_PATH_STYLE
+        ? { forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true' }
+        : {}),
+    },
+  }),
+]
 
 export const plugins: Plugin[] = [
   redirectsPlugin({
