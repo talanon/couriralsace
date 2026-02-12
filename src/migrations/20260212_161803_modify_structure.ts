@@ -79,7 +79,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   DROP INDEX "pages_blocks_section_entete_background_image_idx";
   DROP INDEX "_pages_v_blocks_section_entete_background_image_idx";
   DROP INDEX "header_nav_items_icon_idx";
-  ALTER TABLE "events" ALTER COLUMN "description" SET DATA TYPE jsonb;
   ALTER TABLE "pages_blocks_section_entete" ADD COLUMN "left_title" varchar DEFAULT 'LE FIL
   DES COURSES
   & SOCIAL RUN
@@ -289,7 +288,6 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP INDEX "_pages_v_blocks_section_entete_featured_event_idx";
   DROP INDEX "_pages_v_blocks_section_entete_right_button_right_button_idx";
   DROP INDEX "_pages_v_version_version_parent_idx";
-  ALTER TABLE "events" ALTER COLUMN "description" SET DATA TYPE varchar;
   ALTER TABLE "pages_blocks_section_entete" ADD COLUMN "cta_label" varchar DEFAULT 'Proposer une sortie';
   ALTER TABLE "pages_blocks_section_entete" ADD COLUMN "cta_url" varchar DEFAULT '/proposer';
   ALTER TABLE "pages_blocks_section_entete" ADD COLUMN "title" varchar DEFAULT 'TOUTES LES SORTIES';
