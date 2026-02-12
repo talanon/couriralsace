@@ -127,7 +127,7 @@ export default async function EventPage({ params: paramsPromise }: Args) {
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                S'inscrire
+                S&apos;inscrire
               </a>
             )}
 
