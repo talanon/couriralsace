@@ -4,6 +4,7 @@ import { slugField } from 'payload'
 
 import { assignTenantFromUser } from '../../hooks/assignTenant'
 import { superAdminOnly } from '../../access'
+import { defaultLexical } from '@/fields/defaultLexical'
 
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -167,7 +168,8 @@ export const Events: CollectionConfig = {
     },
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
+      editor: defaultLexical,
       label: 'Description',
     },
     {

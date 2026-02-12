@@ -2,6 +2,7 @@ import type { GlobalConfig } from 'payload'
 
 import { superAdminOnly } from '@/access'
 import { link } from '@/fields/link'
+import { navLucideIconOptions } from './lucideIcons'
 import { revalidateHeader } from './hooks/revalidateHeader'
 
 export const Header: GlobalConfig = {
@@ -21,11 +22,14 @@ export const Header: GlobalConfig = {
         }),
         {
           name: 'icon',
-          type: 'upload',
-          relationTo: 'media',
-          label: 'Icone',
+          type: 'select',
+          label: 'Icone Lucide',
+          options: [...navLucideIconOptions],
           admin: {
             description: 'Icone optionnelle affichee a gauche du libelle.',
+            components: {
+              Field: '@/components/fields/LucideIconSelectField',
+            },
           },
         },
         {

@@ -2,12 +2,22 @@ import Link from 'next/link'
 import React from 'react'
 
 import { Media } from '@/components/Media'
+import RichText from '@/components/RichText'
 import type { ImageTextBlock as ImageTextBlockProps, Media as MediaType } from '@/payload-types'
 import { textWithBreaks } from '@/utilities/textWithBreaks'
 import { cn } from '@/utilities/ui'
 
 const isMediaDocument = (value: unknown): value is MediaType => {
   return Boolean(value && typeof value === 'object' && 'url' in (value as Record<string, unknown>))
+}
+
+const isRichTextValue = (value: unknown): value is { root: { children: unknown[] } } => {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      'root' in (value as Record<string, unknown>) &&
+      typeof (value as { root?: unknown }).root === 'object',
+  )
 }
 
 export const ImageTextBlock: React.FC<ImageTextBlockProps> = ({
@@ -44,8 +54,14 @@ export const ImageTextBlock: React.FC<ImageTextBlockProps> = ({
             {highlightedText && <span className="block text-[var(--brand-green)]">{textWithBreaks(highlightedText)}</span>}
           </h2>
 
-          {description && (
-            <p className="mt-6 text-sm leading-relaxed text-black/75 md:text-base">{textWithBreaks(description)}</p>
+          {isRichTextValue(description) && (
+            <div className="mt-6 text-black/75">
+              <RichText
+                className="max-w-none !text-sm prose-p:font-light prose-p:text-black/75 prose-ul:text-black/75 prose-ol:text-black/75 prose-li:text-black/75 prose-li:marker:text-black/30 md:!text-base"
+                data={description}
+                enableGutter={false}
+              />
+            </div>
           )}
 
           {ctas && ctas.length > 0 && (

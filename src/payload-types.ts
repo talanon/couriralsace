@@ -118,10 +118,12 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    eventTemplate: EventTemplate;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    eventTemplate: EventTemplateSelect<false> | EventTemplateSelect<true>;
   };
   locale: null;
   user: User;
@@ -161,7 +163,8 @@ export interface UserAuthOperations {
 export interface Page {
   id: number;
   title: string;
-  template: 'default' | 'hero';
+  template: 'default' | 'hero' | 'event';
+  eventTemplateVariablesHelp?: string | null;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
     richText?: {
@@ -208,8 +211,6 @@ export interface Page {
   layout: (
     | HomeHeroBlock
     | SectionEnteteBlock
-    | StatsBlock
-    | FeatureSectionBlock
     | EventGridBlock
     | ImageTextBlock
     | TimelineBlock
@@ -235,6 +236,15 @@ export interface Page {
   generateSlug?: boolean | null;
   slug: string;
   tenant?: (number | null) | Tenant;
+  parent?: (number | null) | Page;
+  breadcrumbs?:
+    | {
+        doc?: (number | null) | Page;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -562,78 +572,39 @@ export interface HomeHeroBlock {
  * via the `definition` "SectionEnteteBlock".
  */
 export interface SectionEnteteBlock {
-  ctaLabel?: string | null;
-  ctaUrl?: string | null;
-  title: string;
-  highlightedText: string;
-  location: string;
-  backgroundImage: number | Media;
-  showDecorativeCurves?: boolean | null;
   /**
-   * Exemples: opacity-20, opacity-40, opacity-60, opacity-80, opacity-100
+   * Utilisez <green>...</green> pour la partie verte et des retours a la ligne pour la mise en forme.
    */
-  curveOpacity?: string | null;
+  leftTitle: string;
+  /**
+   * Optionnel. Utilisez <green>...</green> et des retours a la ligne.
+   */
+  leftDescription?: string | null;
+  leftButton: {
+    label: string;
+    type?: ('reference' | 'custom') | null;
+    reference?: (number | null) | Page;
+    url?: string | null;
+  };
+  rightImage: number | Media;
+  featuredEvent: number | Event;
+  /**
+   * Utilisez <green>...</green> pour la partie verte et des retours a la ligne pour la mise en forme.
+   */
+  rightTitle: string;
+  /**
+   * Optionnel. Utilisez <green>...</green> et des retours a la ligne.
+   */
+  rightDescription?: string | null;
+  rightButton: {
+    label: string;
+    type?: ('reference' | 'custom') | null;
+    reference?: (number | null) | Page;
+    url?: string | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'sectionEntete';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "StatsBlock".
- */
-export interface StatsBlock {
-  items?:
-    | {
-        number: string;
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'stats';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FeatureSectionBlock".
- */
-export interface FeatureSectionBlock {
-  title: string;
-  subtitle?: string | null;
-  highlightedText?: string | null;
-  description?: string | null;
-  ctaText?: string | null;
-  ctaLink?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'featureSection';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "EventGridBlock".
- */
-export interface EventGridBlock {
-  title: string;
-  ctaText?: string | null;
-  ctaLink?: string | null;
-  events?: (number | Event)[] | null;
-  /**
-   * Utilise cette liste si la relation events n est pas disponible pour le front.
-   */
-  manualEvents?:
-    | {
-        title: string;
-        dateLabel: string;
-        distanceLabel?: string | null;
-        elevationLabel?: string | null;
-        locationLabel?: string | null;
-        image?: (number | null) | Media;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'eventGrid';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -673,7 +644,21 @@ export interface Event {
         id?: string | null;
       }[]
     | null;
-  description?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   registrationLink?: string | null;
   partners?:
     | {
@@ -694,15 +679,58 @@ export interface Event {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "EventGridBlock".
+ */
+export interface EventGridBlock {
+  title: string;
+  ctaText?: string | null;
+  ctaLink?: string | null;
+  eventSourceMode?: ('currentEventCourses' | 'otherEventsCourses' | 'manualSelection') | null;
+  events?: (number | Event)[] | null;
+  /**
+   * Utilise cette liste si la relation events n est pas disponible pour le front.
+   */
+  manualEvents?:
+    | {
+        title: string;
+        dateLabel: string;
+        distanceLabel?: string | null;
+        elevationLabel?: string | null;
+        locationLabel?: string | null;
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'eventGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ImageTextBlock".
  */
 export interface ImageTextBlock {
   layout?: ('imageLeft' | 'imageRight') | null;
-  image: number | Media;
+  useEventImage?: boolean | null;
+  image?: (number | null) | Media;
   title: string;
   subtitle?: string | null;
   highlightedText?: string | null;
-  description?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   ctas?:
     | {
         text: string;
@@ -711,7 +739,6 @@ export interface ImageTextBlock {
         id?: string | null;
       }[]
     | null;
-  showDecorativeCurves?: boolean | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'imageText';
@@ -838,7 +865,8 @@ export interface ContentBlock {
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
-  media: number | Media;
+  useEventImage?: boolean | null;
+  media?: (number | null) | Media;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaBlock';
@@ -1400,6 +1428,7 @@ export interface PayloadMigration {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   template?: T;
+  eventTemplateVariablesHelp?: T;
   hero?:
     | T
     | {
@@ -1427,8 +1456,6 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         homeHero?: T | HomeHeroBlockSelect<T>;
         sectionEntete?: T | SectionEnteteBlockSelect<T>;
-        stats?: T | StatsBlockSelect<T>;
-        featureSection?: T | FeatureSectionBlockSelect<T>;
         eventGrid?: T | EventGridBlockSelect<T>;
         imageText?: T | ImageTextBlockSelect<T>;
         timeline?: T | TimelineBlockSelect<T>;
@@ -1450,6 +1477,15 @@ export interface PagesSelect<T extends boolean = true> {
   generateSlug?: T;
   slug?: T;
   tenant?: T;
+  parent?: T;
+  breadcrumbs?:
+    | T
+    | {
+        doc?: T;
+        url?: T;
+        label?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1475,43 +1511,28 @@ export interface HomeHeroBlockSelect<T extends boolean = true> {
  * via the `definition` "SectionEnteteBlock_select".
  */
 export interface SectionEnteteBlockSelect<T extends boolean = true> {
-  ctaLabel?: T;
-  ctaUrl?: T;
-  title?: T;
-  highlightedText?: T;
-  location?: T;
-  backgroundImage?: T;
-  showDecorativeCurves?: T;
-  curveOpacity?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "StatsBlock_select".
- */
-export interface StatsBlockSelect<T extends boolean = true> {
-  items?:
+  leftTitle?: T;
+  leftDescription?: T;
+  leftButton?:
     | T
     | {
-        number?: T;
         label?: T;
-        id?: T;
+        type?: T;
+        reference?: T;
+        url?: T;
       };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FeatureSectionBlock_select".
- */
-export interface FeatureSectionBlockSelect<T extends boolean = true> {
-  title?: T;
-  subtitle?: T;
-  highlightedText?: T;
-  description?: T;
-  ctaText?: T;
-  ctaLink?: T;
+  rightImage?: T;
+  featuredEvent?: T;
+  rightTitle?: T;
+  rightDescription?: T;
+  rightButton?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        reference?: T;
+        url?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1523,6 +1544,7 @@ export interface EventGridBlockSelect<T extends boolean = true> {
   title?: T;
   ctaText?: T;
   ctaLink?: T;
+  eventSourceMode?: T;
   events?: T;
   manualEvents?:
     | T
@@ -1544,6 +1566,7 @@ export interface EventGridBlockSelect<T extends boolean = true> {
  */
 export interface ImageTextBlockSelect<T extends boolean = true> {
   layout?: T;
+  useEventImage?: T;
   image?: T;
   title?: T;
   subtitle?: T;
@@ -1557,7 +1580,6 @@ export interface ImageTextBlockSelect<T extends boolean = true> {
         icon?: T;
         id?: T;
       };
-  showDecorativeCurves?: T;
   id?: T;
   blockName?: T;
 }
@@ -1634,6 +1656,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
  * via the `definition` "MediaBlock_select".
  */
 export interface MediaBlockSelect<T extends boolean = true> {
+  useEventImage?: T;
   media?: T;
   id?: T;
   blockName?: T;
@@ -2269,7 +2292,63 @@ export interface Header {
         /**
          * Icone optionnelle affichee a gauche du libelle.
          */
-        icon?: (number | null) | Media;
+        icon?:
+          | (
+              | 'bell'
+              | 'phone'
+              | 'compass'
+              | 'shopping-bag'
+              | 'calendar-days'
+              | 'camera'
+              | 'gift'
+              | 'target'
+              | 'map-pin'
+              | 'clock-3'
+              | 'dumbbell'
+              | 'users'
+              | 'message-circle'
+              | 'footprints'
+              | 'bike'
+              | 'arrow-right'
+              | 'ruler-dimension-line'
+              | 'circle-help'
+              | 'heart-pulse'
+              | 'zap'
+              | 'sparkles'
+              | 'info'
+              | 'check-circle-2'
+              | 'external-link'
+              | 'mail'
+              | 'menu'
+              | 'mountain'
+              | 'mountain-snow'
+              | 'rocket'
+              | 'flag'
+              | 'route'
+              | 'heart-handshake'
+              | 'gauge'
+              | 'play'
+              | 'plus'
+              | 'shield-check'
+              | 'megaphone'
+              | 'award'
+              | 'search'
+              | 'chevron-right'
+              | 'trophy'
+              | 'smile'
+              | 'landmark'
+              | 'star'
+              | 'leaf'
+              | 'ticket'
+              | 'eye'
+              | 'carrot'
+              | 'waves'
+              | 'x'
+              | 'home'
+              | 'newspaper'
+              | 'medal'
+            )
+          | null;
         style?: ('link' | 'green-pill') | null;
         id?: string | null;
       }[]
@@ -2303,6 +2382,38 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "eventTemplate".
+ */
+export interface EventTemplate {
+  id: number;
+  /**
+   * Sélectionnez la page Payload à utiliser comme template (ex: ta page id 91).
+   */
+  templatePage?: (number | null) | Page;
+  help?: string | null;
+  /**
+   * Utilisez les variables ci-dessus dans le texte, ex: Inscription: {{event.registrationLink}}
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2350,6 +2461,18 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "eventTemplate_select".
+ */
+export interface EventTemplateSelect<T extends boolean = true> {
+  templatePage?: T;
+  help?: T;
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

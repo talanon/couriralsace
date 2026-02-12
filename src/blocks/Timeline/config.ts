@@ -3,6 +3,8 @@ import type { Block } from 'payload'
 export const Timeline: Block = {
   slug: 'timeline',
   interfaceName: 'TimelineBlock',
+  imageURL: '/admin/blocks/section_timeline.png',
+  imageAltText: 'Apercu du layout timeline',
   labels: {
     singular: 'Timeline',
     plural: 'Timelines',

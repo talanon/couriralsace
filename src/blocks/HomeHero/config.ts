@@ -3,6 +3,8 @@ import type { Block } from 'payload'
 export const HomeHero: Block = {
   slug: 'homeHero',
   interfaceName: 'HomeHeroBlock',
+  imageURL: '/admin/blocks/section_newsletter.png',
+  imageAltText: 'Apercu du layout newsletter',
   labels: {
     singular: 'Newsletter',
     plural: 'Newsletters',

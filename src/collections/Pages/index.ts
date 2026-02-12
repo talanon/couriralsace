@@ -3,7 +3,6 @@ import type { CollectionConfig } from 'payload'
 import { isSuperAdmin, restrictToUserTenants, requireTenantRole } from '../../access/tenants'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { EventGrid } from '../../blocks/EventGrid/config'
-import { FeatureSection } from '../../blocks/FeatureSection/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
@@ -12,7 +11,6 @@ import { ImageText } from '../../blocks/ImageText/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { AlsaceEventsMap } from '../../blocks/AlsaceEventsMap/config'
 import { SectionEntete } from '../../blocks/SectionEntete/config'
-import { Stats } from '../../blocks/Stats/config'
 import { Timeline } from '../../blocks/Timeline/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
@@ -22,6 +20,7 @@ import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import { assignTenantFromUser } from '../../hooks/assignTenant'
 import { ensureUniquePageSlug } from '../../hooks/ensureUniquePageSlug'
 import { requireTenantField } from '../../hooks/requireTenant'
+import { EVENT_TEMPLATE_VARIABLES } from '@/utilities/interpolateEventTemplate'
 
 import {
   MetaDescriptionField,
@@ -98,8 +97,24 @@ export const Pages: CollectionConfig<'pages'> = {
           label: 'Hero (no chrome)',
           value: 'hero',
         },
+        {
+          label: 'Évènement',
+          value: 'event',
+        },
       ],
       defaultValue: 'default',
+    },
+    {
+      name: 'eventTemplateVariablesHelp',
+      type: 'textarea',
+      virtual: true,
+      label: 'Variables disponibles (template Évènement)',
+      defaultValue: EVENT_TEMPLATE_VARIABLES.join('\n'),
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        condition: (data) => data?.template === 'event',
+      },
     },
     {
       type: 'tabs',
@@ -107,6 +122,9 @@ export const Pages: CollectionConfig<'pages'> = {
         {
           fields: [hero],
           label: 'Hero',
+          admin: {
+            condition: () => false,
+          },
         },
         {
           fields: [
@@ -116,8 +134,6 @@ export const Pages: CollectionConfig<'pages'> = {
               blocks: [
                 HomeHero,
                 SectionEntete,
-                Stats,
-                FeatureSection,
                 EventGrid,
                 ImageText,
                 Timeline,

@@ -321,7 +321,7 @@ export const AlsaceEventsMapClient = ({
               left: `${(startMonth / (months.length - 1)) * 100}%`,
               right: `${100 - (endMonth / (months.length - 1)) * 100}%`,
               background: 'var(--brand-green)',
-              boxShadow: '0 0 20px color-mix(in oklab, var(--brand-green), transparent 55%)',
+              boxShadow: '0 0 20px color-mix(in oklab, var(--brand-green), transparent 100%)',
             }}
           />
 

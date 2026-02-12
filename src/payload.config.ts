@@ -29,6 +29,7 @@ import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
+import { EventTemplate } from './EventTemplate/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
@@ -224,7 +225,7 @@ export default buildConfig({
     collectionOverrides: folderCollectionOverrides,
   },
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer],
+  globals: [Header, Footer, EventTemplate],
   hooks: {
     afterError: [
       async ({ error, req }) => {

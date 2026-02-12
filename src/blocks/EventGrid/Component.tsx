@@ -21,6 +21,8 @@ type CardData = {
   dateLabel: string
   distanceLabel?: string | null
   elevationLabel?: string | null
+  eventLabel?: string | null
+  eventSlug?: string | null
   image?: MediaType | null
   locationLabel?: string | null
   isOfficial?: boolean | null
@@ -35,11 +37,14 @@ const formatDate = (value?: string | null) => {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
 
-  return date.toLocaleDateString('fr-FR', {
+  const formattedDate = date.toLocaleDateString('fr-FR', {
+    weekday: 'short',
     day: 'numeric',
-    month: 'long',
+    month: 'short',
     year: 'numeric',
   })
+
+  return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
 }
 
 const toCardsFromEvent = (event: Event): CardData[] => {
@@ -54,6 +59,8 @@ const toCardsFromEvent = (event: Event): CardData[] => {
       dateLabel: formatDate(cardDate),
       distanceLabel: course.distance != null ? `${course.distance} km` : null,
       elevationLabel: course.elevationGain != null ? `${course.elevationGain} D+` : null,
+      eventLabel: event.title,
+      eventSlug: event.slug || null,
       image: cardImage,
       locationLabel: course.location || event.location,
       isOfficial: course.official !== false,
@@ -64,7 +71,11 @@ const toCardsFromEvent = (event: Event): CardData[] => {
   })
 }
 
-const getUpcomingCards = async (): Promise<CardData[]> => {
+const getUpcomingCards = async ({
+  excludeEventId,
+}: {
+  excludeEventId?: number
+} = {}): Promise<CardData[]> => {
   const payload = await getPayload({ config: configPromise })
   const now = new Date().toISOString()
 
@@ -74,11 +85,26 @@ const getUpcomingCards = async (): Promise<CardData[]> => {
     limit: 100,
     overrideAccess: true,
     sort: 'startDate',
-    where: {
-      startDate: {
-        greater_than_equal: now,
-      },
-    },
+    where: excludeEventId
+      ? {
+          and: [
+            {
+              startDate: {
+                greater_than_equal: now,
+              },
+            },
+            {
+              id: {
+                not_equals: excludeEventId,
+              },
+            },
+          ],
+        }
+      : {
+          startDate: {
+            greater_than_equal: now,
+          },
+        },
   })
 
   return result.docs
@@ -92,7 +118,19 @@ const getUpcomingCards = async (): Promise<CardData[]> => {
     .slice(0, 4)
 }
 
-export const EventGridBlock = async ({ ctaLink, ctaText, events, manualEvents, title }: EventGridBlockProps) => {
+type Props = EventGridBlockProps & {
+  currentEvent?: Event | null
+}
+
+export const EventGridBlock = async ({
+  ctaLink,
+  ctaText,
+  eventSourceMode,
+  events,
+  manualEvents,
+  title,
+  currentEvent,
+}: Props) => {
   const relationCards: CardData[] = (events || [])
     .flatMap((event): CardData[] => {
       if (!isEventDocument(event)) return []
@@ -109,22 +147,36 @@ export const EventGridBlock = async ({ ctaLink, ctaText, events, manualEvents, t
     dateLabel: item.dateLabel,
     distanceLabel: item.distanceLabel,
     elevationLabel: item.elevationLabel,
+    eventLabel: null,
+    eventSlug: null,
     image: isMediaDocument(item.image) ? item.image : null,
     locationLabel: item.locationLabel,
     isOfficial: null,
     title: item.title,
   }))
 
-  let cards = manualCards.length > 0 ? manualCards : relationCards
+  let cards: CardData[] = []
+
+  if (eventSourceMode === 'currentEventCourses') {
+    cards = currentEvent ? toCardsFromEvent(currentEvent) : []
+  } else if (eventSourceMode === 'otherEventsCourses') {
+    cards = await getUpcomingCards({
+      excludeEventId: currentEvent?.id,
+    })
+  } else {
+    cards = manualCards.length > 0 ? manualCards : relationCards
+  }
 
   if (!cards.length) {
-    cards = await getUpcomingCards()
+    cards = await getUpcomingCards({
+      excludeEventId: eventSourceMode === 'otherEventsCourses' ? currentEvent?.id : undefined,
+    })
   }
 
   if (!cards.length) return null
 
   return (
-    <section className="relative overflow-hidden bg-[#f2f2f2] py-12 md:py-16">
+    <section className="relative overflow-hidden bg-[#f2f2f2]">
       <div className="container relative">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <h2 className="text-4xl font-bold uppercase leading-none">{textWithBreaks(title)}</h2>
@@ -177,6 +229,20 @@ export const EventGridBlock = async ({ ctaLink, ctaText, events, manualEvents, t
 
               <div className="space-y-2 p-4">
                 <p className="text-xs font-semibold text-black/65">{card.dateLabel}</p>
+                {card.eventLabel && (
+                  card.eventSlug ? (
+                    <Link
+                      className="text-xs font-extrabold uppercase tracking-wide text-[var(--brand-green)] transition-colors hover:text-black"
+                      href={`/evenements/${card.eventSlug}`}
+                    >
+                      {textWithBreaks(card.eventLabel)}
+                    </Link>
+                  ) : (
+                    <p className="text-xs font-extrabold uppercase tracking-wide text-[var(--brand-green)]">
+                      {textWithBreaks(card.eventLabel)}
+                    </p>
+                  )
+                )}
                 <h3 className="text-xl font-bold leading-tight text-black">{textWithBreaks(card.title)}</h3>
                 <div className="flex flex-wrap gap-4 text-xs text-black/65">
                   {card.distanceLabel && (

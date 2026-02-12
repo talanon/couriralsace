@@ -6,6 +6,7 @@ import { headers } from 'next/headers'
 import type { AlsaceEventsMapBlock as AlsaceEventsMapBlockProps, Event } from '@/payload-types'
 import { resolveTenant } from '@/utilities/resolveTenant'
 import { AlsaceEventsMapClient } from './Map.client'
+import { richTextToPlainText } from '@/utilities/richTextToPlainText'
 
 type MarkerPoint = {
   x: number
@@ -87,7 +88,10 @@ export const AlsaceEventsMapBlock: React.FC<
         title: doc.title,
         date: doc.startDate as string,
         location: markerLocation,
-        description: doc.description,
+        description:
+          typeof doc.description === 'string'
+            ? doc.description
+            : richTextToPlainText(doc.description),
         x: point.x,
         y: point.y,
       }

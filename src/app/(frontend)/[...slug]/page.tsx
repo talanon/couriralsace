@@ -28,45 +28,61 @@ export async function generateStaticParams() {
     overrideAccess: false,
     pagination: false,
     select: {
+      breadcrumbs: true,
       slug: true,
     },
   })
 
   const params = pages.docs
-    ?.filter((doc) => {
-      return doc.slug !== 'home'
+    .map((doc) => {
+      const lastBreadcrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]
+      const breadcrumbURL = typeof lastBreadcrumb?.url === 'string' ? lastBreadcrumb.url : null
+
+      if (breadcrumbURL) {
+        const segments = breadcrumbURL.split('/').filter(Boolean)
+        if (segments.length === 0 || (segments.length === 1 && segments[0] === 'home')) {
+          return null
+        }
+
+        return { slug: segments }
+      }
+
+      if (doc.slug === 'home') {
+        return null
+      }
+
+      return { slug: [doc.slug] }
     })
-    .map(({ slug }) => {
-      return { slug }
-    })
+    .filter((param): param is { slug: string[] } => Boolean(param))
 
   return params
 }
 
 type Args = {
   params: Promise<{
-    slug?: string
+    slug?: string[]
   }>
 }
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
-  const { slug = 'home' } = await paramsPromise
-  // Decode to support slugs with special characters
-  const decodedSlug = decodeURIComponent(slug)
-  const url = '/' + decodedSlug
+  const { slug: slugSegments } = await paramsPromise
+  const decodedSegments = (slugSegments ?? []).map((segment) => decodeURIComponent(segment))
+  const url = decodedSegments.length > 0 ? `/${decodedSegments.join('/')}` : '/'
+  const resolvedSlug = decodedSegments.length > 0 ? decodedSegments[decodedSegments.length - 1] : 'home'
   let page: RequiredDataFromCollectionSlug<'pages'> | null
   const requestHeaders = await headers()
   const host = requestHeaders.get('host')
   const tenant = await resolveTenant(host)
 
-  page = await queryPageBySlug({
-    slug: decodedSlug,
+  page = await queryPageByPath({
+    path: url,
+    slug: resolvedSlug,
     tenantId: tenant?.id ? String(tenant.id) : undefined,
   })
 
   // Remove this code once your website is seeded
-  if (!page && slug === 'home') {
+  if (!page && url === '/') {
     page = homeStatic
   }
 
@@ -90,7 +106,7 @@ export default async function Page({ params: paramsPromise }: Args) {
     : layout
 
   return (
-    <article className={cn('pb-24', useStandardChrome && 'relative isolate overflow-hidden bg-[#f2f2f2]')}>
+    <article className={cn('', useStandardChrome && 'relative isolate overflow-hidden bg-[#f2f2f2]')}>
       <PageClient template={template} />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
@@ -99,12 +115,12 @@ export default async function Page({ params: paramsPromise }: Args) {
 
       {useStandardChrome && (
         <div className="pointer-events-none absolute inset-0 z-20 mix-blend-multiply">
-          <DecorativeCurves opacity="opacity-80" position="right" variant="light" className="!-translate-y-0 !top-[250px]" />
+          <DecorativeCurves opacity="opacity-80" position="right" variant="light" className="!-translate-y-0 !top-[120px]" />
           <DecorativeCurves
             opacity="opacity-80"
             position="left"
             variant="light"
-            className="!-translate-y-0 !top-[920px] md:!top-[980px]"
+            className="!-translate-y-0 !top-[620px] md:!top-[680px]"
           />
         </div>
       )}
@@ -116,12 +132,12 @@ export default async function Page({ params: paramsPromise }: Args) {
 
       {useStandardChrome && (
         <div className="pointer-events-none absolute inset-0 z-50 mix-blend-color">
-          <DecorativeCurves opacity="opacity-80" position="right" variant="light" className="!-translate-y-0 !top-[250px]" />
+          <DecorativeCurves opacity="opacity-80" position="right" variant="light" className="!-translate-y-0 !top-[120px]" />
           <DecorativeCurves
             opacity="opacity-80"
             position="left"
             variant="light"
-            className="!-translate-y-0 !top-[920px] md:!top-[980px]"
+            className="!-translate-y-0 !top-[620px] md:!top-[680px]"
           />
         </div>
       )}
@@ -134,14 +150,16 @@ export default async function Page({ params: paramsPromise }: Args) {
 }
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { slug = 'home' } = await paramsPromise
-  // Decode to support slugs with special characters
-  const decodedSlug = decodeURIComponent(slug)
+  const { slug: slugSegments } = await paramsPromise
+  const decodedSegments = (slugSegments ?? []).map((segment) => decodeURIComponent(segment))
+  const url = decodedSegments.length > 0 ? `/${decodedSegments.join('/')}` : '/'
+  const resolvedSlug = decodedSegments.length > 0 ? decodedSegments[decodedSegments.length - 1] : 'home'
   const requestHeaders = await headers()
   const host = requestHeaders.get('host')
   const tenant = await resolveTenant(host)
-  const page = await queryPageBySlug({
-    slug: decodedSlug,
+  const page = await queryPageByPath({
+    path: url,
+    slug: resolvedSlug,
     tenantId: tenant?.id ? String(tenant.id) : undefined,
   })
 
@@ -154,8 +172,8 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   return generateMeta({ doc: page })
 }
 
-const queryPageBySlug = cache(
-  async ({ slug, tenantId }: { slug: string; tenantId?: string | null }) => {
+const queryPageByPath = cache(
+  async ({ path, slug, tenantId }: { path: string; slug?: string; tenantId?: string | null }) => {
     const { isEnabled: draft } = await draftMode()
 
     const payload = await getPayload({ config: configPromise })
@@ -181,10 +199,27 @@ const queryPageBySlug = cache(
       pagination: false,
       overrideAccess: draft,
       where: {
-        slug: {
-          equals: slug,
-        },
-        ...tenantClause,
+        and: [
+          {
+            or: [
+              {
+                'breadcrumbs.url': {
+                  equals: path,
+                },
+              },
+              ...(slug
+                ? [
+                    {
+                      slug: {
+                        equals: slug,
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+          tenantClause,
+        ],
       },
     })
 
